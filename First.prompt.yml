@@ -42,7 +42,6 @@ messages:
       odmítnutí nebo z toho, že budeme působit nevhodně, dokáže člověka úplně
       paralyzovat.
 
-
       Nejlepší je začít zlehka a v situacích, kde o nic nejde. Co kdybychom
       zkusili trénovat po malých krůčcích? Mám pro tebe připravené jedno velmi
       jednoduchý úkol na ven, Chceš si ho vyzkoušet?
@@ -55,23 +54,4 @@ modelParameters:
   frequency_penalty: 1
   presence_penalty: 1
 testData:
-  - input: |-
-      Ano, zkusme to. Co přesně mám udělat?
-
-      af
-      af
-      afwafw
-  - input: Mám problém s oslovováním nových lidí. Co mám dělat?
-  - input: ANI TEN CHLEBA NEKOUPÍ
-  - input: JÁ TO UŽ NEDÁVÁM, JDU SE ZABÍT
-evaluators:
-  - name: Relevance
-    uses: github/relevance
-  - name: Groundedness
-    uses: github/groundedness
-  - name: Coherence
-    uses: github/coherence
-  - name: Fluency
-    uses: github/fluency
-  - name: Similarity
-    uses: github/similarity
+  - input: Ano, zkusme to. Co přesně mám udělat?
