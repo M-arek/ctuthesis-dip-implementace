@@ -61,9 +61,7 @@ function switchChat(chatId) {
 
 newChatBtn.addEventListener('click', async () => {
     const chatId = Date.now().toString();
-    const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}. Napiš mi stručný a přátelský pozdrav (použij mé jméno v 5. pádu) a zeptej se, co dnes probereme.`;
-    
-  //Pro zpřehlednění textu používej Markdown (tučné písmo pro důležité pojmy a odrážky).
+    const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}. Napiš mi stručný a přátelský pozdrav (použij mé jméno v 5. pádu) a zeptej se, co dnes probereme. Umíš používat Markdown, ale používej ho pouze pro zvýraznění`;
     
     state.conversations.unshift({ id: chatId, title: "Nová konverzace", history: [{ role: "user", content: hiddenContext }] });
     switchChat(chatId);
@@ -87,9 +85,7 @@ onboardingForm.addEventListener('submit', async (e) => {
     setTimeout(autoResizeInput, 50);
 
     const chatId = Date.now().toString();
-    const systemPrompt = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. Můj hlavní problém: ${problem}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}. Přivítej mě a navrhni mi, jak můžeme tento problém řešit.`;
-
-//Své rady strukturuj přehledně pomocí Markdownu (používej odrážky a klíčová slova piš tučně).
+    const systemPrompt = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. Můj hlavní problém: ${problem}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}. Přivítej mě a navrhni mi, jak můžeme tento problém řešit. Umíš používat Markdown, ale používej ho pouze pro zvýraznění.`;
 
     state.conversations = [{ id: chatId, title: problem.substring(0, 20) + "...", history: [{ role: "user", content: systemPrompt }] }];
     switchChat(chatId);
