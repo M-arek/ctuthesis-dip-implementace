@@ -1,0 +1,6 @@
+body { font-family: 'Inter', sans-serif; }
+
+/* Vlastní design posuvníku pro chat */
+.chat-scroll::-webkit-scrollbar { width: 6px; }
+.chat-scroll::-webkit-scrollbar-track { background: transparent; }
+.chat-scroll::-webkit-scrollbar-thumb { background-color: #e5e7eb; border-radius: 20px; }
