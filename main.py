@@ -88,3 +88,7 @@ Tvá pravidla chování:
         
     except Exception as e:
         return {"reply": f"Chyba při komunikaci: {str(e)}"}
+    
+@app.get("/")
+async def root():
+    return {"status": "Backend běží!"}
