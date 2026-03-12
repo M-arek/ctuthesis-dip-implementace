@@ -1,3 +1,37 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+
+# 1. Načtení klíče z .env
+load_dotenv()
+
+# 2. Nastavení přesně podle tvého kódu z GitHub Models
+token = os.environ.get("GITHUB_TOKEN")
+endpoint = "https://models.github.ai/inference"
+model_name = "openai/gpt-4.1-mini"
+
+client = OpenAI(
+    base_url=endpoint,
+    api_key=token,
+)
+
+app = FastAPI()
+
+# Povolení komunikace s frontendem
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class ChatMessage(BaseModel):
+    message: str
+
 @app.post("/api/chat")
 async def chat_with_couplii(user_input: ChatMessage):
     try:
@@ -54,3 +88,8 @@ async def chat_with_couplii(user_input: ChatMessage):
         
     except Exception as e:
         return {"reply": f"Chyba při komunikaci s GitHub Models: {str(e)}"}
+    
+
+@app.get("/")
+async def root():
+    return {"status": "Couplii AI Backend s GPT-4.1-mini běží!"}
