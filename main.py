@@ -46,7 +46,6 @@ async def chat_with_couplii(request: ChatRequest):
         # ----------------------------------------------------------------------
 
         # --- SESTAVENÍ ZPRÁV PRO AI ---
-        # A) Nejprve dáme AI pravidla a tvůj ukázkový příklad
         systemove_zpravy = [
             {
                 "role": "system",
@@ -57,22 +56,19 @@ Tvá pravidla chování:
 - Formátování: Nezahlcuj uživatele dlouhými odstavci. Piš v krátkých blocích.
 - Empatie: Vždy nejprve validuj pocity uživatele a ukaž pochopení.
 - Řešení a akce: Navrhuj konkrétní, malá a splnitelná cvičení pro reálný svět. Nenuť do nich.
-- Posun vpřed: Každou svou zprávu zakonči jednou jasnou, podpůrnou otázkou."""
-            },
-            {
-                "role": "user",
-                "content": "Ahoj, mám problém s oslovováním nových lidí. Bojím se a nevím, kdy je ta správná příležitost někoho oslovit"
-            },
-            {
-                "role": "assistant",
-                "content": "Ahoj! Naprosto ti rozumím. Tenhle pocit zná skoro každý. Strach z odmítnutí nebo z toho, že budeme působit nevhodně, dokáže člověka úplně paralyzovat.\n\nNejlepší je začít zlehka a v situacích, kde o nic nejde. Mám pro tebe připravené jedno velmi jednoduché cvičení na ven. Chceš si ho vyzkoušet?"
+- Posun vpřed: Každou svou zprávu zakonči jednou jasnou, podpůrnou otázkou.
+
+--- UKÁZKA TVÉHO IDEÁLNÍHO STYLU ODPOVĚDI (Toto je jen příklad, nereaguj na něj, pokud se uživatel nezeptá): ---
+Uživatel: Ahoj, mám problém s oslovováním nových lidí. Bojím se a nevím, kdy je ta správná příležitost někoho oslovit.
+Tvá odpověď: Ahoj! Naprosto ti rozumím. Tenhle pocit zná skoro každý. Strach z odmítnutí nebo z toho, že budeme působit nevhodně, dokáže člověka úplně paralyzovat.\n\nNejlepší je začít zlehka a v situacích, kde o nic nejde. Mám pro tebe připravené jedno velmi jednoduché cvičení na ven. Chceš si ho vyzkoušet?
+----------------------------------------------------------------------------------------------------------"""
             }
         ]
 
         # B) Připojíme reálnou historii, kterou poslal uživatelův prohlížeč
         historie_pro_ai = [{"role": msg.role, "content": msg.content} for msg in request.history]
         
-        # C) Všechno to spojíme dohromady jako sendvič
+        # C) Všechno to spojíme dohromady
         vsechny_zpravy = systemove_zpravy + historie_pro_ai
 
         response = client.chat.completions.create(
