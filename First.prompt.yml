@@ -18,7 +18,7 @@ messages:
 
       Návrh lepší formulace.
   - role: user
-    content: Už mě nebaví, jak pořád jenom sedíš u počítače a mě si vůbec nevšímáš!
+    content: '{{input}}'
   - role: assistant
     content: >-
       Chápu, že jsi naštvaná, protože se věci neudělaly podle dohody. Tvá zpráva
@@ -37,3 +37,24 @@ model: openai/gpt-4.1-mini
 modelParameters:
   max_completion_tokens: 300
   temperature: 0.69
+testData:
+  - input: |-
+      Ano, zkusme to. Co přesně mám udělat?
+
+      af
+      af
+      afwafw
+  - input: Mám problém s oslovováním nových lidí. Co mám dělat?
+  - input: ANI TEN CHLEBA NEKOUPÍ
+  - input: JÁ TO UŽ NEDÁVÁM, JDU SE ZABÍT
+evaluators:
+  - name: Relevance
+    uses: github/relevance
+  - name: Groundedness
+    uses: github/groundedness
+  - name: Coherence
+    uses: github/coherence
+  - name: Fluency
+    uses: github/fluency
+  - name: Similarity
+    uses: github/similarity
