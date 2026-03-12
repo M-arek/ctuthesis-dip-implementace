@@ -77,52 +77,53 @@
             }
         });
 
+        // 1. ZDE VYTVÁŘÍME PAMĚŤ PRO KONVERZACI (prázdné pole)
+        let chatHistory = [];
+
         // Zpracování odeslání formuláře
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             const message = input.value.trim();
             if (!message) return;
 
-            // 1. Přidání zprávy uživatele do chatu
+            // Zobrazení v chatu
             appendMessage(message, 'user');
             
-            // Vyčištění pole pro psaní
+            // 2. ULOŽENÍ ZPRÁVY UŽIVATELE DO PAMĚTI
+            chatHistory.push({ role: "user", content: message });
+            
             input.value = '';
             input.style.height = 'auto';
             sendBtn.disabled = true;
 
-            // 2. Zobrazení animace načítání "AI přemýšlí"
             const loadingId = appendLoading();
 
             try {
                 // ZDE VLOŽ SVOU ZKOPÍROVANOU ADRESU Z KROKU 1
                 const backendUrl = "https://ctuthesis-dip-implementace.onrender.com"; 
                 
-                // 3. Odeslání zprávy do Python backendu přes fetch()
                 const response = await fetch(`${backendUrl}/api/chat`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message: message }) // Zabalení zprávy do JSON formátu
+                    headers: { 'Content-Type': 'application/json' },
+                    // 3. ODESÍLÁME CELOU HISTORII MÍSTO JEDNÉ ZPRÁVY
+                    body: JSON.stringify({ history: chatHistory }) 
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Chyba serveru: ${response.status}`);
-                }
+                if (!response.ok) throw new Error("Chyba serveru");
 
-                // 4. Rozbalení odpovědi od Pythonu
                 const data = await response.json();
 
-                // Odstranění načítací animace a zobrazení reálné odpovědi
                 document.getElementById(loadingId).remove();
                 appendMessage(data.reply, 'ai');
 
+                // 4. ULOŽENÍ ODPOVĚDI AI DO PAMĚTI (aby věděla, co sama řekla)
+                chatHistory.push({ role: "assistant", content: data.reply });
+
             } catch (error) {
-                // Pokud server neběží nebo je chyba ve spojení
                 document.getElementById(loadingId).remove();
-                appendMessage("Jejda, spojení s mozkem (backendem) selhalo. Zkontroluj, jestli běží server a jestli je port veřejný. 🤖", 'ai');
-                console.error("Chyba:", error);
+                appendMessage("Jejda, spojení selhalo.", 'ai');
+                // Pokud nastala chyba, raději smažeme poslední uživatelskou zprávu z paměti
+                chatHistory.pop(); 
             }
         });
 
