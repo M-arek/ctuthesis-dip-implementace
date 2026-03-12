@@ -33,23 +33,22 @@ messages:
       Posun vpřed: Každou svou zprávu zakonči jednou jasnou, podpůrnou otázkou,
       aby konverzace přirozeně a bez tlaku pokračovala.
   - role: user
-    content: '{{input}} {{V}} {{g}}'
+    content: >-
+      Ahoj, mám problém s oslovováním nových lidí. Bojím se a nevím, kdy je ta
+      správná příležitost někoho oslovit
   - role: assistant
     content: >-
-      Ahoj Milane! Naprosto ti rozumím. Tenhle pocit zná spousta z nás, strach z
+      Ahoj! Naprosto ti rozumím. Tenhle pocit zná skoro každý, Strach z
       odmítnutí nebo z toho, že budeme působit nevhodně, dokáže člověka úplně
-      paralyzovat. Zvlášť když máš za sebou špatné zkušenosti z minulosti.
+      paralyzovat.
 
 
-      Nejlepší je začít zlehka a v situacích, kde o nic nejde. Důležité je
-      netlačit na pilu. Co kdybychom to zkusili trénovat po malých krůčcích? Mám
-      pro tebe připravené jedno velmi jednoduché cvičení na ven, které ti pomůže
-      ten prvotní strach zlomit. Chceš si ho vyzkoušet?
+      Nejlepší je začít zlehka a v situacích, kde o nic nejde. Ale zároveň
+      netlačit na pilu. Co kdybychom zkusili trénovat po malých krůčcích? Mám
+      pro tebe připravené jedno velmi jednoduchý úkol na ven, Chceš si ho
+      vyzkoušet?
   - role: user
-    content: >-
-      Ahoj, mám problém s oslovováním nových lidí. Strašně se bojím a vlastně
-      nikdy nevím, kdy je ta správná příležitost někoho oslovit, abych nebyl
-      otravný.
+    content: '{{input}} {{V}} {{g}} '
 model: openai/gpt-4.1-mini
 modelParameters:
   max_completion_tokens: 300
