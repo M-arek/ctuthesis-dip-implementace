@@ -4,7 +4,7 @@
 //const backendUrl = "https://ctuthesis-dip-implementace.onrender.com";
 
 // 2. VÝVOJ (Tvůj lokální Codespace / Localhost - jen pro tebe. Bleskový start)
-const backendUrl = "https://tvoje-codespace-adresa-8000.app.github.dev";
+const backendUrl = "https://automatic-giggle-x5979575546p2p694-8000.app.github.dev/";
 
 export async function fetchAIResponse(history) {
     const response = await fetch(`${backendUrl}/api/chat`, {

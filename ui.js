@@ -83,3 +83,59 @@ export function appendLoading(container) {
 function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
 }
+
+export function initMobileMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    // Funkce pro otevření
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+    }
+
+    // Funkce pro zavření
+    function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+    }
+
+    // Kliknutí na tlačítko ☰ otevře menu
+    if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+    
+    // Kliknutí mimo menu (na to ztmavlé pozadí) ho zavře
+    if (overlay) overlay.addEventListener('click', closeSidebar);
+
+    // --- LOGIKA PRO SWIPE GESTA ---
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // Když se prst dotkne obrazovky
+    document.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    // Když prst opustí obrazovku
+    document.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+        const swipeDistance = touchEndX - touchStartX;
+        const threshold = 50; // Prst musí ujet aspoň 50 pixelů
+        
+        // Pokud táhneš doprava (a začal jsi u levého kraje obrazovky)
+        if (swipeDistance > threshold && touchStartX < 50) {
+            openSidebar();
+        } 
+        // Pokud táhneš doleva (zavíráš menu)
+        else if (swipeDistance < -threshold) {
+            closeSidebar();
+        }
+    }
+    
+    // Vrátíme funkci closeSidebar, aby ji mohl použít main.js (při kliknutí na chat)
+    return { closeSidebar };
+}

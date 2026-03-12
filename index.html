@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Couplii AI Chat</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
-<script>
+    <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
                         primary: 'var(--primary-color)',
-                        secondary: 'var(--secondary-color)' // <--- Nová vybledlá barva
+                        secondary: 'var(--secondary-color)'
                     }
                 }
             }
@@ -21,8 +22,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 h-screen flex overflow-hidden transition-colors duration-300">
-
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 h-[100dvh] flex overflow-hidden transition-colors duration-300">
+    
     <div id="onboarding-screen" class="flex-1 flex flex-col items-center justify-center p-4 w-full h-full bg-white dark:bg-gray-900 z-50 transition-colors duration-300">
         <div class="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700">
             <div class="flex justify-center mb-4">
@@ -66,10 +67,11 @@
         </div>
     </div>
 
-    
     <div id="chat-screen" class="hidden flex-1 flex h-full w-full bg-white dark:bg-gray-900 transition-colors duration-300">
         
-        <aside class="w-64 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:flex flex-col p-4 z-20 transition-colors duration-300">
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+
+        <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 w-64 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col p-4 z-50 transition-transform duration-300">
             <button id="new-chat-btn" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-xl w-full mb-6 transition-colors flex items-center justify-center gap-2 shadow-sm">
                 <span class="text-xl leading-none">+</span> Nový chat
             </button>
@@ -80,33 +82,38 @@
 
         <main class="flex-1 flex flex-col h-full relative w-full">
             <header class="h-16 flex items-center px-4 md:px-8 border-b border-gray-100 dark:border-gray-800 justify-between bg-white dark:bg-gray-900 z-10 transition-colors duration-300">
-                <div class="flex items-center gap-2">
-                    <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    <h1 class="text-xl font-bold text-primary tracking-tight">Couplii</h1>
+                
+                <div class="flex items-center gap-3">
+                    <button id="mobile-menu-btn" class="md:hidden text-2xl text-gray-500 dark:text-gray-400 focus:outline-none">☰</button>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        <h1 class="text-xl font-bold text-primary tracking-tight">Couplii</h1>
+                    </div>
                 </div>
                 
                 <div class="flex items-center gap-4">
                     <div class="relative group">
-                        <input type="color" id="color-picker" value="#0d9488" class="w-7 h-7 p-0 border-0 rounded cursor-pointer bg-transparent" title="Změnit hlavní barvu">
+                        <input type="color" id="color-picker" value="#9e0000" class="w-7 h-7 p-0 border-0 rounded cursor-pointer bg-transparent" title="Změnit hlavní barvu">
                     </div>
                     <button id="theme-toggle" class="text-xl hover:scale-110 transition-transform focus:outline-none" title="Přepnout tmavý/světlý režim">🌙</button>
-                    <button class="md:hidden text-gray-500 dark:text-gray-400">☰</button>
                 </div>
             </header>
 
             <div id="chat-container" class="flex-1 overflow-y-auto chat-scroll p-4 md:p-8 space-y-6 pb-36">
                 </div>
 
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white dark:from-gray-900 via-white dark:via-gray-900 to-transparent pt-6 pb-6 px-4 md:px-8">
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white dark:from-gray-900 via-white dark:via-gray-900 to-transparent pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] px-4 md:px-8">
                 <div class="max-w-3xl mx-auto relative">
                     <form id="chat-form" class="relative flex items-end border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 shadow-sm focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all">
                         <textarea id="message-input" rows="1" class="w-full max-h-32 p-4 pr-12 bg-transparent text-gray-800 dark:text-white outline-none resize-none overflow-y-auto chat-scroll rounded-2xl" placeholder="Napiš zprávu... (Enter pro odeslání)"></textarea>
+                        
                         <button type="submit" id="send-btn" disabled class="absolute right-2 bottom-2 p-2 text-gray-400 hover:text-primary transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" /></svg>
                         </button>
                     </form>
                 </div>
             </div>
+            
         </main>
     </div>
 

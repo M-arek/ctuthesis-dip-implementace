@@ -1,6 +1,6 @@
 import { state, loadData, saveData } from './storage.js';
 import { fetchAIResponse } from './api.js';
-import { initTheme, renderChatList, appendMessage, appendLoading } from './ui.js';
+import { initTheme, renderChatList, appendMessage, appendLoading, initMobileMenu } from './ui.js';
 
 // --- HTML ELEMENTY ---
 const onboardingForm = document.getElementById('onboarding-form');
@@ -12,10 +12,12 @@ const chatContainer = document.getElementById('chat-container');
 const sendBtn = document.getElementById('send-btn');
 const chatList = document.getElementById('chat-list');
 const newChatBtn = document.getElementById('new-chat-btn');
+let mobileMenuControls;
 
 // --- START APLIKACE ---
 function initApp() {
     initTheme();
+    mobileMenuControls = initMobileMenu(); // <--- PŘIDÁNO
     loadData();
 
     if (state.userProfile) {
@@ -48,6 +50,9 @@ function switchChat(chatId) {
         if (index === 0 && msg.role === 'user' && msg.content.includes('jmenuji se')) return;
         appendMessage(msg.content, msg.role, chatContainer);
     });
+    
+    // Pokud jsme na mobilu, zavřeme menu po vybrání chatu
+    if (mobileMenuControls) mobileMenuControls.closeSidebar();
 }
 
 newChatBtn.addEventListener('click', async () => {
