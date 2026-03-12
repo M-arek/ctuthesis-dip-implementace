@@ -43,12 +43,11 @@ messages:
       paralyzovat.
 
 
-      Nejlepší je začít zlehka a v situacích, kde o nic nejde. Ale zároveň
-      netlačit na pilu. Co kdybychom zkusili trénovat po malých krůčcích? Mám
-      pro tebe připravené jedno velmi jednoduchý úkol na ven, Chceš si ho
-      vyzkoušet?
+      Nejlepší je začít zlehka a v situacích, kde o nic nejde. Co kdybychom
+      zkusili trénovat po malých krůčcích? Mám pro tebe připravené jedno velmi
+      jednoduchý úkol na ven, Chceš si ho vyzkoušet?
   - role: user
-    content: '{{input}} {{V}} {{g}} '
+    content: '{{input}} '
 model: openai/gpt-4.1-mini
 modelParameters:
   max_completion_tokens: 300
