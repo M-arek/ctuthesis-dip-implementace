@@ -36,7 +36,6 @@ export function renderChatList(conversations, currentChatId, chatListElement, on
     chatListElement.innerHTML = '';
     conversations.forEach(chat => {
         const div = document.createElement('div');
-        // Zde jsme vyměnili bg-teal za naši novou dynamickou bg-secondary!
         const isActive = chat.id === currentChatId ? 'bg-secondary text-primary font-bold' : 'hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-gray-300';
         div.className = `p-3 rounded-lg cursor-pointer text-sm truncate transition ${isActive}`;
         div.textContent = chat.title;
@@ -47,17 +46,68 @@ export function renderChatList(conversations, currentChatId, chatListElement, on
 
 export function appendMessage(text, sender, container) {
     const div = document.createElement('div');
-    div.className = 'flex gap-4 max-w-3xl mx-auto w-full';
+    // 'group' zajistí, že se kopírovací tlačítko ukáže na najetí myši
+    div.className = 'flex gap-4 max-w-3xl mx-auto w-full group';
     
     if (sender === 'user') {
-        div.innerHTML = `<div class="bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-tr-sm px-5 py-3 text-gray-800 dark:text-gray-100 break-words w-fit max-w-[85%]">${escapeHTML(text)}</div>`;
+        // ZPRÁVA UŽIVATELE (Zarovnaná doprava i s tlačítkem)
         div.classList.add('flex-row-reverse');
-    } else {
         div.innerHTML = `
-            <div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white text-xs shadow-md">✨</div>
-            <div class="text-gray-800 dark:text-gray-200 leading-relaxed max-w-[85%]"><p>${escapeHTML(text).replace(/\n/g, '<br>')}</p></div>
+            <div class="flex flex-col items-end max-w-[85%] w-full">
+                <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-tr-sm px-5 py-3 text-gray-800 dark:text-gray-100 break-words w-fit inline-block">
+                    ${escapeHTML(text).replace(/\n/g, '<br>')}
+                </div>
+                <button class="copy-btn mt-2 mr-1 flex items-center gap-1 text-xs text-gray-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    <span>Zkopírovat</span>
+                </button>
+            </div>
+        `;
+    } else {
+        // ZPRÁVA AI (Zarovnaná doleva)
+        // Zde je správně vložený tvůj Markdown překladač!
+        const formattedText = marked.parse(text);
+
+        div.innerHTML = `
+            <div class="w-8 h-8 mt-1 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white text-xs shadow-md">✨</div>
+            <div class="text-gray-800 dark:text-gray-200 leading-relaxed max-w-[85%] w-full flex flex-col items-start">
+                <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl rounded-tl-sm px-5 py-3 shadow-sm inline-block w-fit overflow-hidden">
+                    
+                    <div class="prose prose-sm dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 marker:text-primary">
+                        ${formattedText}
+                    </div>
+
+                </div>
+                <button class="copy-btn mt-2 ml-1 flex items-center gap-1 text-xs text-gray-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    <span>Zkopírovat</span>
+                </button>
+            </div>
         `;
     }
+    
+    // Společná logika pro zkopírování textu do schránky
+    const copyBtn = div.querySelector('.copy-btn');
+    copyBtn.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(text);
+            
+            const span = copyBtn.querySelector('span');
+            const svg = copyBtn.querySelector('svg');
+            span.textContent = 'Zkopírováno!';
+            svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
+            copyBtn.classList.add('text-green-500', 'opacity-100');
+            
+            setTimeout(() => {
+                span.textContent = 'Zkopírovat';
+                svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>';
+                copyBtn.classList.remove('text-green-500', 'opacity-100');
+            }, 2000);
+        } catch (err) {
+            console.error('Chyba při kopírování:', err);
+        }
+    });
+    
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
 }
@@ -89,34 +139,27 @@ export function initMobileMenu() {
     const menuBtn = document.getElementById('mobile-menu-btn');
     const overlay = document.getElementById('sidebar-overlay');
 
-    // Funkce pro otevření
     function openSidebar() {
         sidebar.classList.remove('-translate-x-full');
         overlay.classList.remove('hidden');
     }
 
-    // Funkce pro zavření
     function closeSidebar() {
         sidebar.classList.add('-translate-x-full');
         overlay.classList.add('hidden');
     }
 
-    // Kliknutí na tlačítko ☰ otevře menu
     if (menuBtn) menuBtn.addEventListener('click', openSidebar);
-    
-    // Kliknutí mimo menu (na to ztmavlé pozadí) ho zavře
     if (overlay) overlay.addEventListener('click', closeSidebar);
 
     // --- LOGIKA PRO SWIPE GESTA ---
     let touchStartX = 0;
     let touchEndX = 0;
 
-    // Když se prst dotkne obrazovky
     document.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
 
-    // Když prst opustí obrazovku
     document.addEventListener('touchend', e => {
         touchEndX = e.changedTouches[0].screenX;
         handleSwipe();
@@ -124,18 +167,15 @@ export function initMobileMenu() {
 
     function handleSwipe() {
         const swipeDistance = touchEndX - touchStartX;
-        const threshold = 50; // Prst musí ujet aspoň 50 pixelů
+        const threshold = 50; 
         
-        // Pokud táhneš doprava (a začal jsi u levého kraje obrazovky)
         if (swipeDistance > threshold && touchStartX < 50) {
             openSidebar();
         } 
-        // Pokud táhneš doleva (zavíráš menu)
         else if (swipeDistance < -threshold) {
-            closeSidebar();
+            closeSidebar(); // TADY jsi předtím omylem vložil ten kód zprávy AI. Teď je to opravené!
         }
     }
     
-    // Vrátíme funkci closeSidebar, aby ji mohl použít main.js (při kliknutí na chat)
     return { closeSidebar };
 }
