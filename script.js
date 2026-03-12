@@ -86,24 +86,29 @@ onboardingForm.addEventListener('submit', async function(e) {
 });
 
 // 4. VYTVOŘENÍ NOVÉHO CHATU (Bez dotazníku)
-newChatBtn.addEventListener('click', () => createNewChat());
+newChatBtn.addEventListener('click', async () => await createNewChat());
 
-function createNewChat() {
+async function createNewChat() {
     const chatId = Date.now().toString();
-    // Tajná první zpráva, která AI nastaví kontext, aniž by se ptala na detaily
-    const hiddenContext = `Ahoj, jmenuji se ${userProfile.name}. Má aktuální situace: ${userProfile.status}. V naší konverzaci mi prosím od teď ${userProfile.tone}. Napiš jen velmi stručný pozdrav a zeptej se, co dnes probereme.`;
+    
+    // Instrukce pro AI, aby tě sama pozdravila a skloňovala jméno
+    const hiddenContext = `Ahoj, jmenuji se ${userProfile.name}. Má aktuální situace: ${userProfile.status}. V naší konverzaci mi prosím od teď ${userProfile.tone}. Napiš mi stručný a přátelský pozdrav (použij mé jméno v 5. pádu) a zeptej se, co dnes probereme.`;
     
     const newChat = {
         id: chatId,
         title: "Nová konverzace",
+        // Už sem nepíšeme natvrdo odpověď od asistenta!
         history: [
-            { role: "user", content: hiddenContext },
-            { role: "assistant", content: `Ahoj ${userProfile.name}! Jsem tu pro tebe. Jakou situaci nebo zprávu dnes rozebereme?` }
+            { role: "user", content: hiddenContext }
         ]
     };
     
-    conversations.unshift(newChat); // Přidá na začátek seznamu
+    conversations.unshift(newChat); 
     switchChat(chatId);
+    
+    // Rovnou odešleme dotaz na AI (uživatel vidí animaci načítání)
+    const loadingId = appendLoading();
+    await fetchAIResponse(loadingId);
 }
 
 // 5. PŘEPÍNÁNÍ MEZI CHATY

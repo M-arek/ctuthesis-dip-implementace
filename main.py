@@ -83,7 +83,14 @@ Tvá odpověď: Ahoj! Naprosto ti rozumím. Tenhle pocit zná skoro každý. Str
         return {"reply": response.choices[0].message.content}
         
     except Exception as e:
-        return {"reply": f"Chyba při komunikaci: {str(e)}"}
+        error_msg = str(e)
+        
+        # Pokud chyba obsahuje zmínku o bezpečnostních filtrech Azure/GitHubu
+        if "content management policy" in error_msg or "ResponsibleAIPolicyViolation" in error_msg:
+            return {"reply": "Omlouvám se, ale tato zpráva narazila na naše bezpečnostní filtry (detekce násilí, sebepoškozování apod.). Pokud se nacházíte v krizové situaci a potřebujete pomoc, zavolejte prosím okamžitě na Linku první psychické pomoci: 116 123 nebo na Linku bezpečí: 116 111."}
+        
+        # Pro jakékoliv jiné technické chyby (např. výpadek internetu)
+        return {"reply": f"Jejda, chyba při komunikaci s AI: {error_msg}"}
     
 @app.get("/")
 async def root():
