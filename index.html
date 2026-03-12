@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Couplii AI Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+<script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: 'var(--primary-color, #0d9488)' // Výchozí je původní teal-600
+                        primary: 'var(--primary-color)',
+                        secondary: 'var(--secondary-color)' // <--- Nová vybledlá barva
                     }
                 }
             }
@@ -108,6 +109,6 @@
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>
