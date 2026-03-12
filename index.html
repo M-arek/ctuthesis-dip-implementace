@@ -5,25 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Couplii AI Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: 'var(--primary-color, #0d9488)' // Výchozí je původní teal-600
+                    }
+                }
+            }
+        }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 text-gray-800 h-screen flex overflow-hidden">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 h-screen flex overflow-hidden transition-colors duration-300">
 
-    <div id="onboarding-screen" class="flex-1 flex flex-col items-center justify-center p-4 w-full h-full bg-white z-50">
-        <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
-            <h1 class="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-blue-600 text-center">Vítej v Couplii</h1>
-            <p class="text-gray-500 mb-8 text-center text-sm">Abychom ti mohli co nejlépe pomoci, prozraď nám o sobě pár detailů.</p>
+    <div id="onboarding-screen" class="flex-1 flex flex-col items-center justify-center p-4 w-full h-full bg-white dark:bg-gray-900 z-50 transition-colors duration-300">
+        <div class="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700">
+            <div class="flex justify-center mb-4">
+                <svg class="w-12 h-12 text-primary" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </div>
+            <h1 class="text-3xl font-bold mb-2 text-primary text-center">Vítej v Couplii</h1>
+            <p class="text-gray-500 dark:text-gray-400 mb-8 text-center text-sm">Abychom ti mohli co nejlépe pomoci, prozraď nám o sobě pár detailů.</p>
             
             <form id="onboarding-form" class="space-y-5">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Jak ti můžeme říkat?</label>
-                    <input type="text" id="user-name" required class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none transition" placeholder="Tvé jméno nebo přezdívka">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jak ti můžeme říkat?</label>
+                    <input type="text" id="user-name" required class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-primary outline-none transition" placeholder="Tvé jméno">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Jaká je tvá situace?</label>
-                    <select id="user-status" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none bg-white">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jaká je tvá situace?</label>
+                    <select id="user-status" class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-primary outline-none">
                         <option value="jsem ve vztahu">Jsem ve vztahu a chci ho zlepšit</option>
                         <option value="jsem single a hledám vztah">Jsem single a mám strach ze seznamování</option>
                         <option value="procházím těžkým rozchodem">Procházím rozchodem</option>
@@ -31,49 +46,60 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">S čím ti dnes Couplii pomůže?</label>
-                    <textarea id="user-problem" required rows="2" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none resize-none transition" placeholder="Např.: Hádáme se kvůli úklidu..."></textarea>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">S čím ti dnes Couplii pomůže?</label>
+                    <textarea id="user-problem" required rows="2" class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-primary outline-none resize-none transition" placeholder="Např.: Hádáme se kvůli úklidu..."></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Jak si přeješ, aby s tebou AI mluvila?</label>
-                    <select id="user-tone" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none bg-white">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jak si přeješ, aby s tebou AI mluvila?</label>
+                    <select id="user-tone" class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-primary outline-none">
                         <option value="tykej mi">Tykej mi (Přátelský tón)</option>
                         <option value="vykejte mi">Vykejte mi (Profesionální tón)</option>
                     </select>
                 </div>
 
-                <button type="submit" class="w-full bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all transform hover:scale-[1.02] mt-4">
+                <button type="submit" class="w-full bg-primary hover:opacity-90 text-white font-semibold py-3 px-4 rounded-xl transition-all transform hover:scale-[1.02] mt-4">
                     Začít konverzaci ✨
                 </button>
             </form>
         </div>
     </div>
-<div id="chat-screen" class="hidden flex-1 flex h-full w-full bg-white">
+
+    <div id="chat-screen" class="hidden flex-1 flex h-full w-full bg-white dark:bg-gray-900 transition-colors duration-300">
         
-        <aside class="w-64 bg-gray-50 border-r border-gray-200 hidden md:flex flex-col p-4 z-20">
-            <button id="new-chat-btn" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-xl w-full mb-6 transition-colors flex items-center justify-center gap-2 shadow-sm">
+        <aside class="w-64 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:flex flex-col p-4 z-20 transition-colors duration-300">
+            <button id="new-chat-btn" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-xl w-full mb-6 transition-colors flex items-center justify-center gap-2 shadow-sm">
                 <span class="text-xl leading-none">+</span> Nový chat
             </button>
-            <div class="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Tvé konverzace</div>
+            <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Tvé konverzace</div>
             <div id="chat-list" class="space-y-1 overflow-y-auto chat-scroll flex-1">
-            </div>
+                </div>
         </aside>
 
         <main class="flex-1 flex flex-col h-full relative w-full">
-            <header class="h-16 flex items-center px-4 md:px-8 border-b border-gray-100 justify-between bg-white z-10">
-                <h1 class="text-xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-blue-600">Couplii</h1>
-                <button class="md:hidden text-gray-500">☰</button>
+            <header class="h-16 flex items-center px-4 md:px-8 border-b border-gray-100 dark:border-gray-800 justify-between bg-white dark:bg-gray-900 z-10 transition-colors duration-300">
+                <div class="flex items-center gap-2">
+                    <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    <h1 class="text-xl font-bold text-primary tracking-tight">Couplii</h1>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="relative group">
+                        <input type="color" id="color-picker" value="#0d9488" class="w-7 h-7 p-0 border-0 rounded cursor-pointer bg-transparent" title="Změnit hlavní barvu">
+                    </div>
+                    <button id="theme-toggle" class="text-xl hover:scale-110 transition-transform focus:outline-none" title="Přepnout tmavý/světlý režim">🌙</button>
+                    <button class="md:hidden text-gray-500 dark:text-gray-400">☰</button>
+                </div>
             </header>
 
             <div id="chat-container" class="flex-1 overflow-y-auto chat-scroll p-4 md:p-8 space-y-6 pb-36">
                 </div>
 
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent pt-6 pb-6 px-4 md:px-8">
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white dark:from-gray-900 via-white dark:via-gray-900 to-transparent pt-6 pb-6 px-4 md:px-8">
                 <div class="max-w-3xl mx-auto relative">
-                    <form id="chat-form" class="relative flex items-end border border-gray-300 rounded-2xl bg-white shadow-sm focus-within:ring-1 focus-within:ring-teal-500 focus-within:border-teal-500 transition-all">
-                        <textarea id="message-input" rows="1" class="w-full max-h-32 p-4 pr-12 bg-transparent outline-none resize-none overflow-y-auto chat-scroll rounded-2xl" placeholder="Napiš zprávu... (Enter pro odeslání)"></textarea>
-                        <button type="submit" id="send-btn" disabled class="absolute right-2 bottom-2 p-2 text-gray-400 hover:text-teal-600 transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
+                    <form id="chat-form" class="relative flex items-end border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 shadow-sm focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all">
+                        <textarea id="message-input" rows="1" class="w-full max-h-32 p-4 pr-12 bg-transparent text-gray-800 dark:text-white outline-none resize-none overflow-y-auto chat-scroll rounded-2xl" placeholder="Napiš zprávu... (Enter pro odeslání)"></textarea>
+                        <button type="submit" id="send-btn" disabled class="absolute right-2 bottom-2 p-2 text-gray-400 hover:text-primary transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" /></svg>
                         </button>
                     </form>
@@ -81,25 +107,6 @@
             </div>
         </main>
     </div>
-    <main id="chat-screen" class="hidden flex-1 flex flex-col h-full relative bg-white w-full">
-        <header class="h-16 flex items-center px-4 md:px-8 border-b border-gray-100 justify-between bg-white z-10">
-            <h1 class="text-xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-blue-600">Couplii</h1>
-        </header>
-
-        <div id="chat-container" class="flex-1 overflow-y-auto chat-scroll p-4 md:p-8 space-y-6 pb-36">
-            </div>
-
-        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent pt-6 pb-6 px-4 md:px-8">
-            <div class="max-w-3xl mx-auto relative">
-                <form id="chat-form" class="relative flex items-end border border-gray-300 rounded-2xl bg-white shadow-sm focus-within:ring-1 focus-within:ring-teal-500 focus-within:border-teal-500 transition-all">
-                    <textarea id="message-input" rows="1" class="w-full max-h-32 p-4 pr-12 bg-transparent outline-none resize-none overflow-y-auto chat-scroll rounded-2xl" placeholder="Napiš zprávu... (Enter pro odeslání)"></textarea>
-                    <button type="submit" id="send-btn" disabled class="absolute right-2 bottom-2 p-2 text-gray-400 hover:text-teal-600 transition-colors disabled:opacity-30 disabled:hover:text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" /></svg>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </main>
 
     <script src="script.js"></script>
 </body>

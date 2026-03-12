@@ -12,6 +12,38 @@ const newChatBtn = document.getElementById('new-chat-btn');
 // --- TVOJE RENDER ADRESA ---
 const backendUrl = "https://ctuthesis-dip-implementace.onrender.com"; // Zkontroluj!
 
+// --- NASTAVENÍ VZHLEDU (Dark Mode a Barvy) ---
+const themeToggle = document.getElementById('theme-toggle');
+const colorPicker = document.getElementById('color-picker');
+
+// Načtení uloženého vzhledu
+const savedTheme = localStorage.getItem('couplii_theme');
+const savedColor = localStorage.getItem('couplii_color') || '#0d9488'; // Výchozí modro-zelená
+
+// Aplikace tmavého režimu
+if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark');
+    themeToggle.textContent = '☀️';
+}
+// Aplikace vybrané barvy
+document.documentElement.style.setProperty('--primary-color', savedColor);
+colorPicker.value = savedColor;
+
+// Přepínání Dark/Light mode
+themeToggle.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    themeToggle.textContent = isDark ? '☀️' : '🌙';
+    localStorage.setItem('couplii_theme', isDark ? 'dark' : 'light');
+});
+
+// Změna hlavní barvy přes paletu
+colorPicker.addEventListener('input', (e) => {
+    const color = e.target.value;
+    document.documentElement.style.setProperty('--primary-color', color);
+    localStorage.setItem('couplii_color', color);
+});
+
 // --- DATA A PAMĚŤ ---
 let userProfile = null; 
 let conversations = []; 
@@ -218,12 +250,13 @@ function appendMessage(text, sender) {
     div.className = 'flex gap-4 max-w-3xl mx-auto w-full';
     
     if (sender === 'user') {
-        div.innerHTML = `<div class="bg-gray-100 rounded-2xl rounded-tr-sm px-5 py-3 text-gray-800 break-words w-fit max-w-[85%]">${escapeHTML(text)}</div>`;
+        div.innerHTML = `<div class="bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-tr-sm px-5 py-3 text-gray-800 dark:text-gray-100 break-words w-fit max-w-[85%]">${escapeHTML(text)}</div>`;
         div.classList.add('flex-row-reverse');
     } else {
+        // Zde jsme nahradili natvrdo daný přechod za naši dynamickou třídu 'bg-primary'
         div.innerHTML = `
-            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex-shrink-0 flex items-center justify-center text-white text-xs">✨</div>
-            <div class="text-gray-800 leading-relaxed max-w-[85%]"><p>${escapeHTML(text).replace(/\n/g, '<br>')}</p></div>
+            <div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white text-xs">✨</div>
+            <div class="text-gray-800 dark:text-gray-200 leading-relaxed max-w-[85%]"><p>${escapeHTML(text).replace(/\n/g, '<br>')}</p></div>
         `;
     }
     chatContainer.appendChild(div);
@@ -236,11 +269,11 @@ function appendLoading() {
     div.id = id;
     div.className = 'flex gap-4 max-w-3xl mx-auto w-full';
     div.innerHTML = `
-        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex-shrink-0 flex items-center justify-center text-white text-xs animate-pulse">✨</div>
-        <div class="flex items-center space-x-1.5 bg-gray-50 px-4 py-3 rounded-2xl rounded-tl-sm w-fit">
-            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.15s"></div>
-            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
+        <div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white text-xs animate-pulse">✨</div>
+        <div class="flex items-center space-x-1.5 bg-gray-50 dark:bg-gray-800 px-4 py-3 rounded-2xl rounded-tl-sm w-fit">
+            <div class="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
+            <div class="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.15s"></div>
+            <div class="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
         </div>
     `;
     chatContainer.appendChild(div);
