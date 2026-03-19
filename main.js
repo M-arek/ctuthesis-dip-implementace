@@ -15,6 +15,25 @@ const chatList = document.getElementById('chat-list');
 const newChatBtn = document.getElementById('new-chat-btn');
 let mobileMenuControls;
 
+const personaTherapistBtn = document.getElementById('persona-therapist');
+const personaCoachBtn = document.getElementById('persona-coach');
+let currentPersona = 'therapist'; // Výchozí je hodný terapeut
+
+// --- PŘEPÍNÁNÍ OSOBNOSTÍ ---
+function setPersona(persona) {
+    currentPersona = persona;
+    if (persona === 'therapist') {
+        personaTherapistBtn.className = "px-2 py-1.5 md:px-3 md:py-1 rounded-md bg-white dark:bg-gray-700 shadow text-primary font-medium transition-all";
+        personaCoachBtn.className = "px-2 py-1.5 md:px-3 md:py-1 rounded-md text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-all";
+    } else {
+        personaCoachBtn.className = "px-2 py-1.5 md:px-3 md:py-1 rounded-md bg-white dark:bg-gray-700 shadow text-primary font-medium transition-all";
+        personaTherapistBtn.className = "px-2 py-1.5 md:px-3 md:py-1 rounded-md text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-all";
+    }
+}
+personaTherapistBtn.addEventListener('click', () => setPersona('therapist'));
+personaCoachBtn.addEventListener('click', () => setPersona('coach'));
+
+
 // --- START APLIKACE ---
 function initApp() {
     initTheme();
@@ -118,7 +137,22 @@ async function handleBotResponse() {
     const loadingId = appendLoading(chatContainer);
     
     try {
-        const data = await fetchAIResponse(chat.history);
+        // FINTA: Vytvoříme si kopii historie zpráv jen pro odeslání na server
+        const historyToSend = JSON.parse(JSON.stringify(chat.history));
+        
+        // Vezmeme poslední zprávu od uživatele, kterou právě posílá
+        const lastMessage = historyToSend[historyToSend.length - 1];
+        
+        // Přilepíme k ní tajnou instrukci podle toho, jaký přepínač je zrovna aktivní
+        if (currentPersona === 'coach') {
+            lastMessage.content += "\n\n[TAJNÁ INSTRUKCE PRO TUTO ODPOVĚĎ: Zapomeň na přehnanou empatii. Nyní jsi velmi přísný, racionální a přímý vztahový kouč. Nechoď kolem horké kaše, analyzuj fakta, buď kritický (ale užitečný) a navrhni tvrdá, pragmatická řešení. Piš jasně a stručně. Text naformátuj pomocí Markdownu.]";
+        } else {
+            lastMessage.content += "\n\n[TAJNÁ INSTRUKCE PRO TUTO ODPOVĚĎ: Nyní jsi maximálně laskavý, chápavý a empatický terapeut. Validuj uživatelovy emoce, utěš ho a nabídni jemná, pečující a podpůrná slova. Buď velmi vřelý. Text naformátuj pomocí Markdownu.]";
+        }
+
+        // Odešleme upravenou zprávu AI (uživatel tuhle tajnou instrukci neuvidí)
+        const data = await fetchAIResponse(historyToSend);
+        
         document.getElementById(loadingId).remove();
         appendMessage(data.reply, 'assistant', chatContainer);
         chat.history.push({ role: "assistant", content: data.reply });

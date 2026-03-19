@@ -83,25 +83,26 @@
         </aside>
 
         <main class="flex-1 flex flex-col h-full relative w-full">
-            <header class="h-16 flex items-center px-4 md:px-8 border-b border-gray-100 dark:border-gray-800 justify-between bg-white dark:bg-gray-900 z-10 transition-colors duration-300">
+            <header class="h-16 flex items-center px-3 md:px-8 border-b border-gray-100 dark:border-gray-800 justify-between bg-white dark:bg-gray-900 z-10 transition-colors duration-300">
                 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     <button id="mobile-menu-btn" class="md:hidden text-2xl text-gray-500 dark:text-gray-400 focus:outline-none">☰</button>
-                    <div class="flex items-center gap-2">
+                    <div class="hidden sm:flex items-center gap-2">
                         <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                         <h1 class="text-xl font-bold text-primary tracking-tight">Couplii</h1>
                     </div>
                 </div>
+
+                <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 text-xs md:text-sm mx-1">
+                    <button id="persona-therapist" class="px-2 py-1.5 md:px-3 md:py-1 rounded-md bg-white dark:bg-gray-700 shadow text-primary font-medium transition-all">❤️ Hodný</button>
+                    <button id="persona-coach" class="px-2 py-1.5 md:px-3 md:py-1 rounded-md text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-all">🧠 Přísný</button>
+                </div>
                 
-                <div class="flex items-center gap-4">
-                    
+                <div class="flex items-center gap-2 md:gap-4">
                     <div class="relative group flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer" title="Změnit hlavní barvu">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-400 group-hover:text-primary transition-colors">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-400 group-hover:text-primary transition-colors"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42" /></svg>
                         <input type="color" id="color-picker" value="#9e0000" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                     </div>
-
                     <button id="theme-toggle" class="text-xl hover:scale-110 transition-transform focus:outline-none" title="Přepnout tmavý/světlý režim">🌙</button>
                 </div>
             </header>
