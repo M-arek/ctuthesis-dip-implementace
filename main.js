@@ -40,6 +40,21 @@ function updateSidebar() {
     renderChatList(state.conversations, state.currentChatId, chatList, switchChat);
 }
 
+function updateProgressBar(percent) {
+    const bar = document.getElementById('chat-progress-bar');
+    if (bar) {
+        bar.style.width = `${percent}%`;
+        // Volitelně: Pokud je to 100%, můžeme lištu obarvit na zeleno
+        if (percent >= 100) {
+            bar.classList.remove('bg-primary');
+            bar.classList.add('bg-green-500');
+        } else {
+            bar.classList.add('bg-primary');
+            bar.classList.remove('bg-green-500');
+        }
+    }
+}
+
 // --- PŘEPÍNÁNÍ A TVORBA CHATU ---
 function switchChat(chatId) {
     state.currentChatId = chatId;
@@ -57,11 +72,13 @@ function switchChat(chatId) {
     
     // Pokud jsme na mobilu, zavřeme menu po vybrání chatu
     if (mobileMenuControls) mobileMenuControls.closeSidebar();
+    // (na konci funkce switchChat)
+    updateProgressBar(chat.progress || 0);
 }
 
 newChatBtn.addEventListener('click', async () => {
     const chatId = Date.now().toString();
-    const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}. Napiš mi stručný a přátelský pozdrav (použij mé jméno v 5. pádu) a zeptej se, co dnes probereme. Umíš používat Markdown, ale používej ho pouze pro zvýraznění`;
+    const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}. Napiš mi stručný a přátelský pozdrav (použij mé jméno v 5. pádu) a zeptej se, co dnes probereme. Umíš používat Markdown, ale používej ho pouze pro zvýraznění. Na úplný začátek své odpovědi vždy napiš skrytý tag s odhadem, na kolik procent je tento problém vyřešen (např. [PROGRESS: 10]). Až za ním pokračuj textem.`;
     
     state.conversations.unshift({ id: chatId, title: "Nová konverzace", history: [{ role: "user", content: hiddenContext }] });
     switchChat(chatId);
@@ -85,7 +102,7 @@ onboardingForm.addEventListener('submit', async (e) => {
     setTimeout(autoResizeInput, 50);
 
     const chatId = Date.now().toString();
-    const systemPrompt = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. Můj hlavní problém: ${problem}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}. Přivítej mě a navrhni mi, jak můžeme tento problém řešit. Umíš používat Markdown, ale používej ho pouze pro zvýraznění.`;
+    const systemPrompt = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. Můj hlavní problém: ${problem}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}. Přivítej mě a navrhni mi, jak můžeme tento problém řešit. Umíš používat Markdown, ale používej ho pouze pro zvýraznění. Na úplný začátek své odpovědi vždy napiš skrytý tag s odhadem, na kolik procent je tento problém vyřešen (např. [PROGRESS: 10]). Až za ním pokračuj textem.`;
 
     state.conversations = [{ id: chatId, title: problem.substring(0, 20) + "...", history: [{ role: "user", content: systemPrompt }] }];
     switchChat(chatId);
@@ -120,9 +137,27 @@ async function handleBotResponse() {
     try {
         const data = await fetchAIResponse(chat.history);
         document.getElementById(loadingId).remove();
-        appendMessage(data.reply, 'assistant', chatContainer);
-        chat.history.push({ role: "assistant", content: data.reply });
+        
+        let replyText = data.reply;
+        let currentProgress = chat.progress || 0;
+
+        // REGEX FINTA: Hledáme tag [PROGRESS: 45] na začátku zprávy
+        const progressMatch = replyText.match(/^\[PROGRESS:\s*(\d+)\]/i);
+        if (progressMatch) {
+            currentProgress = parseInt(progressMatch[1], 10);
+            // Ustřihneme tag ze zprávy, aby ho uživatel nikdy neviděl
+            replyText = replyText.replace(/^\[PROGRESS:\s*\d+\]\s*/i, '').trim();
+        }
+
+        // Uložíme nový progres do paměti chatu a zaktualizujeme UI
+        chat.progress = currentProgress;
+        updateProgressBar(currentProgress);
+        
+        appendMessage(replyText, 'assistant', chatContainer);
+        chat.history.push({ role: "assistant", content: replyText });
+        
         saveData();
+        updateSidebar(); // Zaktualizuje i mini-lišty v levém menu
     } catch (error) {
         document.getElementById(loadingId).remove();
         appendMessage("Jejda, spojení selhalo.", 'assistant', chatContainer);

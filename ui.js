@@ -37,8 +37,19 @@ export function renderChatList(conversations, currentChatId, chatListElement, on
     conversations.forEach(chat => {
         const div = document.createElement('div');
         const isActive = chat.id === currentChatId ? 'bg-secondary text-primary font-bold' : 'hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-gray-300';
-        div.className = `p-3 rounded-lg cursor-pointer text-sm truncate transition ${isActive}`;
-        div.textContent = chat.title;
+        div.className = `p-3 rounded-lg cursor-pointer text-sm transition ${isActive}`;
+        
+        // Zabezpečení proti neexistujícímu progresu u starých chatů
+        const progress = chat.progress || 0; 
+        
+        // Přidali jsme mini-lištu progresu přímo pod název chatu
+        div.innerHTML = `
+            <div class="truncate mb-1.5">${escapeHTML(chat.title)}</div>
+            <div class="w-full bg-gray-300 dark:bg-gray-600 h-1 rounded-full overflow-hidden opacity-50">
+                <div class="bg-primary h-1 transition-all duration-500" style="width: ${progress}%"></div>
+            </div>
+        `;
+        
         div.onclick = () => onChatClick(chat.id);
         chatListElement.appendChild(div);
     });
