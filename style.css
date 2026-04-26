@@ -4,3 +4,8 @@ body { font-family: 'Inter', sans-serif; }
 .chat-scroll::-webkit-scrollbar { width: 6px; }
 .chat-scroll::-webkit-scrollbar-track { background: transparent; }
 .chat-scroll::-webkit-scrollbar-thumb { background-color: #e5e7eb; border-radius: 20px; }
+
+/* Zezelenání progress baru při 100% */
+#chat-progress-bar[style*="100"] {
+    background-color: #22c55e !important; /* Toto je přesný kód pro Tailwind bg-green-500 */
+}
