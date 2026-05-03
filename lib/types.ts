@@ -13,6 +13,7 @@ export interface Conversation {
   id: string;
   title: string;
   history: Message[];
+  progress?: number;
 }
 
 export interface AppState {

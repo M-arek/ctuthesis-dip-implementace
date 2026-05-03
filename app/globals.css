@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Use class-based dark mode so .dark class on <html> controls it, not system preference */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --primary-color: #9e0000;
   --secondary-color: #9e000026;
@@ -12,13 +15,6 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary-color);
   --color-secondary: var(--secondary-color);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {

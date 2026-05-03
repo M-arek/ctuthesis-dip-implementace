@@ -12,6 +12,11 @@ import ChatMessage from '@/components/ChatMessage';
 import LoadingMessage from '@/components/LoadingMessage';
 import ChatInput from '@/components/ChatInput';
 
+const SHARED_INSTRUCTIONS = `
+3. Jsi odborník výhradně na mezilidské vztahy. Pokud začnu mluvit o nesouvisejících věcech (např. auta, programování, vaření), zdvořile mě odmítni a nasměruj konverzaci zpět ke vztahům.
+4. Umíš používat Markdown, ale používej ho pouze pro zvýraznění.
+5. Na úplný začátek své odpovědi vždy napiš skrytý tag s odhadem, na kolik procent je TENTO KONKRÉTNÍ problém vyřešen (např. [PROGRESS: 10]). 100 % znamená pouze to, že jsme pro tento jeden konkrétní problém našli řešení nebo akční krok (nehledáme celoživotní dokonalost vztahu). Až za tímto tagem pokračuj textem.`;
+
 export default function Chat() {
   const {
     state,
@@ -38,60 +43,92 @@ export default function Chat() {
     setUserProfile(profile);
 
     const chatId = Date.now().toString();
-    const systemPrompt = `Ahoj, jmenuji se ${profile.name}. Má aktuální situace: ${profile.status}. Můj hlavní problém: ${problem}. V naší konverzaci mi prosím od teď ${profile.tone}. Přivítej mě a navrhni mi, jak můžeme tento problém řešit. Umíš používat Markdown, ale používej ho pouze pro zvýraznění.`;
+    const systemPrompt = `Ahoj, jmenuji se ${profile.name}. Má aktuální situace: ${profile.status}. Můj hlavní problém: ${problem}. V naší konverzaci mi prosím od teď ${profile.tone}.
 
+INSTRUKCE PRO TEBE:
+1. Přivítej mě a navrhni mi, jak můžeme tento můj problém řešit.
+2. Oslov mě mým jménem (v 5. pádu) POUZE v této tvé úplně první zprávě. V dalších zprávách už mé jméno nikdy neopakuj.${SHARED_INSTRUCTIONS}`;
+
+    const initialHistory: Message[] = [{ role: 'user', content: systemPrompt }];
     const newConversation: Conversation = {
       id: chatId,
       title: problem.substring(0, 20) + '...',
-      history: [{ role: 'user', content: systemPrompt }]
+      history: initialHistory
     };
 
     addConversation(newConversation);
-    await handleBotResponse(chatId, `Ahoj Couplii! Jmenuji se ${profile.name} a trápí mě toto: ${problem}`);
+    await handleBotResponse(chatId, initialHistory);
   };
 
   const handleNewChat = async () => {
     if (!state.userProfile) return;
 
     const chatId = Date.now().toString();
-    const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}. Napiš mi stručný a přátelský pozdrav (použij mé jméno v 5. pádu) a zeptej se, co dnes probereme. Umíš používat Markdown, ale používej ho pouze pro zvýraznění`;
+    const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}.
 
+INSTRUKCE PRO TEBE:
+1. Napiš mi stručný a přátelský pozdrav a zeptej se, co dnes probereme.
+2. Oslov mě mým jménem (v 5. pádu) POUZE v této tvé úplně první zprávě. V dalších zprávách už mé jméno nikdy neopakuj.${SHARED_INSTRUCTIONS}`;
+
+    const initialHistory: Message[] = [{ role: 'user', content: hiddenContext }];
     const newConversation: Conversation = {
       id: chatId,
       title: 'Nová konverzace',
-      history: [{ role: 'user', content: hiddenContext }]
+      history: initialHistory
     };
 
     addConversation(newConversation);
-    await handleBotResponse(chatId);
+    await handleBotResponse(chatId, initialHistory);
   };
 
   const handleSendMessage = async (message: string) => {
     if (!state.currentChatId) return;
 
+    const currentConv = getCurrentConversation();
+    if (!currentConv) return;
+
     const userMessage: Message = { role: 'user', content: message };
+    const updatedHistory = [...currentConv.history, userMessage];
+    const newTitle = currentConv.title === 'Nová konverzace' ? message.substring(0, 20) + '...' : currentConv.title;
 
-    updateConversation(state.currentChatId, (conv) => {
-      const newHistory = [...conv.history, userMessage];
-      const newTitle = conv.title === 'Nová konverzace' ? message.substring(0, 20) + '...' : conv.title;
-      return { ...conv, history: newHistory, title: newTitle };
-    });
+    updateConversation(state.currentChatId, (conv) => ({
+      ...conv,
+      history: updatedHistory,
+      title: newTitle
+    }));
 
-    await handleBotResponse(state.currentChatId);
+    // Pass the updated history directly to avoid stale React state closure
+    await handleBotResponse(state.currentChatId, updatedHistory);
   };
 
-  const handleBotResponse = async (chatId: string, displayMessage?: string) => {
+  const handleBotResponse = async (chatId: string, historyToSend?: Message[]) => {
     setIsLoadingMessage(true);
 
     try {
+      // Use the directly passed history to avoid stale state closure
       const conversation = state.conversations.find(c => c.id === chatId);
-      if (!conversation) return;
+      const history = historyToSend ?? conversation?.history;
+      if (!history) {
+        console.error('handleBotResponse: no history found for chatId', chatId);
+        return;
+      }
 
-      const data = await fetchAIResponse(conversation.history);
+      const data = await fetchAIResponse(history);
+
+      let replyText = data.reply;
+      let newProgress: number | undefined;
+
+      // Extract optional leading [PROGRESS: XX] tag (allow whitespace before/after tag)
+      const progressMatch = replyText.match(/^\s*\[PROGRESS:\s*(\d+)\]\s*/i);
+      if (progressMatch) {
+        newProgress = Math.min(100, Math.max(0, parseInt(progressMatch[1], 10)));
+        replyText = replyText.slice(progressMatch[0].length).trim();
+      }
 
       updateConversation(chatId, (conv) => ({
         ...conv,
-        history: [...conv.history, { role: 'assistant', content: data.reply }]
+        history: [...conv.history, { role: 'assistant', content: replyText }],
+        ...(newProgress !== undefined ? { progress: newProgress } : {})
       }));
     } catch (error) {
       updateConversation(chatId, (conv) => {
@@ -130,6 +167,8 @@ export default function Chat() {
     return true;
   }) || [];
 
+  const progress = currentConversation?.progress ?? 0;
+
   return (
     <div className="flex-1 flex h-[100dvh] w-full bg-white dark:bg-gray-900 transition-colors duration-300">
       <Sidebar
@@ -149,6 +188,18 @@ export default function Chat() {
           onColorChange={setPrimaryColor}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
+
+        {currentConversation && (
+          <div className="px-4 md:px-8 py-2 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
+            <div className="flex-1 bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+              <div
+                className={`h-1.5 transition-all duration-500 rounded-full ${progress >= 100 ? 'bg-green-500' : 'bg-primary'}`}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{progress}%</span>
+          </div>
+        )}
 
         <div ref={chatContainerRef} className="flex-1 overflow-y-auto chat-scroll p-4 md:p-8 space-y-6 pb-4">
           {displayMessages.map((msg, index) => (

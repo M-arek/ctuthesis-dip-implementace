@@ -45,6 +45,7 @@ export default function Sidebar({
         <div className="space-y-1 overflow-y-auto chat-scroll flex-1">
           {conversations.map((chat) => {
             const isActive = chat.id === currentChatId;
+            const progress = chat.progress ?? 0;
             return (
               <div
                 key={chat.id}
@@ -54,13 +55,19 @@ export default function Sidebar({
                     onClose();
                   }
                 }}
-                className={`p-3 rounded-lg cursor-pointer text-sm truncate transition ${
+                className={`p-3 rounded-lg cursor-pointer text-sm transition ${
                   isActive
                     ? 'bg-secondary text-primary font-bold'
                     : 'hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-gray-300'
                 }`}
               >
-                {chat.title}
+                <div className="truncate mb-1.5">{chat.title}</div>
+                <div className="w-full bg-gray-300 dark:bg-gray-600 h-1 rounded-full overflow-hidden opacity-50">
+                  <div
+                    className={`h-1 transition-all duration-500 ${progress >= 100 ? 'bg-green-500' : 'bg-primary'}`}
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
               </div>
             );
           })}
