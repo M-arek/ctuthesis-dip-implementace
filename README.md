@@ -99,6 +99,38 @@ Backend URL můžete změnit v `.env.local`:
 NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
 ```
 
+## 🛠️ Troubleshooting
+
+Pokud při spuštění development serveru (`npm run dev`) narazíte na chybu typu "Cannot find native binding" z `@tailwindcss/oxide` nebo podobné chyby související s optional native dependencies, zkuste následující kroky:
+
+- Rychlé opravení (lokálně):
+
+```bash
+# ukončete případné běžící instance
+pkill -f "next dev" || true
+
+# odstraňte lokální instalace a cache, pak znovu nainstalujte
+rm -rf node_modules package-lock.json .next
+npm install
+npm run dev
+```
+
+- Trvalejší možnosti:
+	- Přechod na `pnpm` nebo `yarn` — lepší správa optional native dependencies a deterministické lockfiles.
+	- Uzamknout/pinout verze problematických balíčků v `package.json`.
+	- Přidat CI krok, který provede čistou instalaci pokud build selže.
+
+Poznámka: výše uvedený rychlý postup je workaround pro neočekávané selhání instalace npm (chyba npm při optional dependencies). Hodí se pro rychlé obnovení vývojového prostředí, ale pokud se chyba opakuje v týmu/CI, doporučujeme zvážit jednu z trvalejších možností.
+
+### `.env` a tokeny
+
+V `README` je zmíněn soubor `.env.local` — ano, pokud backend běží lokálně, je potřeba do něj vložit vaše tokeny/URL ručně (např. `NEXT_PUBLIC_BACKEND_URL` nebo API klíče). Pokud ale používáte vzdálený backend (např. Render) a frontend směruje na jeho veřejnou URL, nemusíte lokálně vypisovat tokeny.
+
+Shrnutí:
+- Lokálně: vytvořte `.env.local` podle `.env.example` a vložte potřebné tokeny.
+- Na Renderu: backend spravuje své env proměnné, frontend může používat veřejné URL, takže nemusíte do repozitáře přidávat tokeny.
+
+
 ## 📝 Poznámky ke konverzi
 
 Tato aplikace byla převedena z vanilla JavaScript na Next.js s následujícími změnami:

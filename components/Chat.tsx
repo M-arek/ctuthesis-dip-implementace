@@ -82,6 +82,7 @@ INSTRUKCE PRO TEBE:
   };
 
   const handleSendMessage = async (message: string) => {
+    console.debug('[Chat] handleSendMessage', { message, currentChatId: state.currentChatId });
     if (!state.currentChatId) return;
 
     const currentConv = getCurrentConversation();
@@ -96,6 +97,8 @@ INSTRUKCE PRO TEBE:
       history: updatedHistory,
       title: newTitle
     }));
+
+    console.debug('[Chat] updatedHistory length', updatedHistory.length);
 
     // Pass the updated history directly to avoid stale React state closure
     await handleBotResponse(state.currentChatId, updatedHistory);

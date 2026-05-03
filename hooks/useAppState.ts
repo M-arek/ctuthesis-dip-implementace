@@ -35,8 +35,10 @@ export function useAppState() {
   };
 
   const setConversations = (conversations: Conversation[]) => {
-    setState(prev => ({ ...prev, conversations }));
-    saveConversations(conversations);
+    setState(prev => {
+      saveConversations(conversations);
+      return { ...prev, conversations };
+    });
   };
 
   const setCurrentChatId = (chatId: string | null) => {
@@ -44,16 +46,22 @@ export function useAppState() {
   };
 
   const addConversation = (conversation: Conversation) => {
-    const newConversations = [conversation, ...state.conversations];
-    setConversations(newConversations);
-    setCurrentChatId(conversation.id);
+    setState(prev => {
+      const newConversations = [conversation, ...prev.conversations];
+      saveConversations(newConversations);
+      return { ...prev, conversations: newConversations, currentChatId: conversation.id };
+    });
+    console.debug('[useAppState] addConversation -> scheduled add for', conversation.id);
   };
 
   const updateConversation = (chatId: string, updater: (conv: Conversation) => Conversation) => {
-    const newConversations = state.conversations.map(c =>
-      c.id === chatId ? updater(c) : c
-    );
-    setConversations(newConversations);
+    console.debug('[useAppState] updateConversation called for chatId', chatId);
+    setState(prev => {
+      const newConversations = prev.conversations.map(c => (c.id === chatId ? updater(c) : c));
+      saveConversations(newConversations);
+      console.debug('[useAppState] updateConversation -> newConversations length', newConversations.length);
+      return { ...prev, conversations: newConversations };
+    });
   };
 
   const getCurrentConversation = () => {
