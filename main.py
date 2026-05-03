@@ -82,6 +82,22 @@ Tvá odpověď: Ahoj! Naprosto ti rozumím. Tenhle pocit zná skoro každý. Str
         
         return {"reply": response.choices[0].message.content}
         
+
+    except Exception as e:
+        error_msg = str(e)
+        
+        # --- NOVÉ: TVRDÝ DEBUG PRINT DO LOGŮ ---
+        print("\n" + "="*50)
+        print("!!! CHYBA PŘI VOLÁNÍ GITHUB/OPENAI API !!!")
+        print(error_msg)
+        print("="*50 + "\n")
+        
+        if "content management policy" in error_msg or "ResponsibleAIPolicyViolation" in error_msg:
+            return {"reply": "Omlouvám se, ale tato zpráva narazila na naše bezpečnostní filtry..."}
+        
+        return {"reply": f"Jejda, chyba při komunikaci s AI: {error_msg}"}
+
+'''
     except Exception as e:
         error_msg = str(e)
         
@@ -91,7 +107,7 @@ Tvá odpověď: Ahoj! Naprosto ti rozumím. Tenhle pocit zná skoro každý. Str
         
         # Pro jakékoliv jiné technické chyby (např. výpadek internetu)
         return {"reply": f"Jejda, chyba při komunikaci s AI: {error_msg}"}
-    
+'''
 @app.get("/")
 async def root():
     return {"status": "Backend běží!"}
