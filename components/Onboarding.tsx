@@ -29,19 +29,19 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         </div>
         <h1 className="text-3xl font-bold mb-2 text-primary text-center">Vítej v Couplii</h1>
         <p className="text-gray-500 dark:text-gray-400 mb-8 text-center text-sm">
-          Abychom ti mohli co nejlépe pomoci, prozraď nám o sobě pár detailů.
+          Vyplň údaje pro lepší zážitek, nebo rovnou začni chatovat.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Jak ti můžeme říkat?
+              Jak ti můžeme říkat? <span className="text-gray-400 font-normal">(volitelné)</span>
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
+              // ODEBRÁNO: required
               className="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-primary outline-none transition"
               placeholder="Tvé jméno"
             />
@@ -64,12 +64,12 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              S čím ti dnes Couplii pomůže?
+              S čím ti dnes Couplii pomůže? <span className="text-gray-400 font-normal">(volitelné)</span>
             </label>
             <textarea
               value={problem}
               onChange={(e) => setProblem(e.target.value)}
-              required
+              // ODEBRÁNO: required
               rows={2}
               className="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-primary outline-none resize-none transition"
               placeholder="Např.: Hádáme se kvůli úklidu..."

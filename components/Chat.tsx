@@ -41,15 +41,26 @@ export default function Chat() {
     const chatId = Date.now().toString();
     const systemPrompt = `Ahoj, jmenuji se ${profile.name}. Má aktuální situace: ${profile.status}. Můj hlavní problém: ${problem}. V naší konverzaci mi prosím od teď ${profile.tone}.`;
     const initialHistory: Message[] = [{ role: 'user', content: systemPrompt }];
+    
+    // PŘIDÁNO: Pokud uživatel zadal problém, přidáme k první zprávě pro AI tajnou instrukci
+    const historyToSend = [...initialHistory];
+    if (problem.trim().length > 0) {
+      historyToSend[0] = {
+        ...historyToSend[0],
+        content: historyToSend[0].content + "\n\n[SKRYTÁ INSTRUKCE: Na úplný začátek tvé odpovědi přidej skrytý tag s velmi krátkým názvem pro tuto konverzaci (max 3-4 slova), např. [TITLE: Hádka kvůli úklidu].]"
+      };
+    }
+
     const newConversation: Conversation = {
       id: chatId,
-      title: problem,
-      history: initialHistory
+      title: 'Nová konverzace', // ZMĚNA: Vždy nastavíme tento výchozí název
+      history: initialHistory,
+      progress: 0 // Přidal jsem progress na 0, pokud ho tvůj typ Conversation vyžaduje
     };
 
     addConversation(newConversation);
-    // ZMĚNA: Přidán parametr "profile" na konec!
-    await handleBotResponse(chatId, initialHistory, profile);
+    // ZMĚNA: Posíláme do AI upravenou historii (historyToSend), aby nám rovnou vrátila i [TITLE]
+    await handleBotResponse(chatId, historyToSend, profile);
   };
 
   const handleNewChat = async () => {
