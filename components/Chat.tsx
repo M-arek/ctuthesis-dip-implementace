@@ -12,11 +12,6 @@ import ChatMessage from '@/components/ChatMessage';
 import LoadingMessage from '@/components/LoadingMessage';
 import ChatInput from '@/components/ChatInput';
 
-const SHARED_INSTRUCTIONS = `
-3. Jsi odborník výhradně na mezilidské vztahy. Pokud začnu mluvit o nesouvisejících věcech (např. auta, programování, vaření), zdvořile mě odmítni a nasměruj konverzaci zpět ke vztahům.
-4. Umíš používat Markdown, ale používej ho pouze pro zvýraznění.
-5. Na úplný začátek své odpovědi vždy napiš skrytý tag s odhadem, na kolik procent je TENTO KONKRÉTNÍ problém vyřešen (např. [PROGRESS: 10]). 100 % znamená pouze to, že jsme pro tento jeden konkrétní problém našli řešení nebo akční krok (nehledáme celoživotní dokonalost vztahu). Až za tímto tagem pokračuj textem.`;
-
 export default function Chat() {
   const {
     state,
@@ -43,12 +38,7 @@ export default function Chat() {
     setUserProfile(profile);
 
     const chatId = Date.now().toString();
-    const systemPrompt = `Ahoj, jmenuji se ${profile.name}. Má aktuální situace: ${profile.status}. Můj hlavní problém: ${problem}. V naší konverzaci mi prosím od teď ${profile.tone}.
-
-INSTRUKCE PRO TEBE:
-1. Přivítej mě a navrhni mi, jak můžeme tento můj problém řešit.
-2. Oslov mě mým jménem (v 5. pádu) POUZE v této tvé úplně první zprávě. V dalších zprávách už mé jméno nikdy neopakuj.${SHARED_INSTRUCTIONS}`;
-
+    const systemPrompt = `Ahoj, jmenuji se ${profile.name}. Má aktuální situace: ${profile.status}. Můj hlavní problém: ${problem}. V naší konverzaci mi prosím od teď ${profile.tone}.`;
     const initialHistory: Message[] = [{ role: 'user', content: systemPrompt }];
     const newConversation: Conversation = {
       id: chatId,
@@ -64,12 +54,7 @@ INSTRUKCE PRO TEBE:
     if (!state.userProfile) return;
 
     const chatId = Date.now().toString();
-    const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}.
-
-INSTRUKCE PRO TEBE:
-1. Napiš mi stručný a přátelský pozdrav a zeptej se, co dnes probereme.
-2. Oslov mě mým jménem (v 5. pádu) POUZE v této tvé úplně první zprávě. V dalších zprávách už mé jméno nikdy neopakuj.${SHARED_INSTRUCTIONS}`;
-
+    const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}.`;
     const initialHistory: Message[] = [{ role: 'user', content: hiddenContext }];
     const newConversation: Conversation = {
       id: chatId,
