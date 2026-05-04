@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { marked } from 'marked';
+import ReactMarkdown from 'react-markdown';
 import { Message } from '@/lib/types';
 
 interface ChatMessageProps {
@@ -58,8 +58,6 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     );
   }
 
-  const formattedText = marked.parse(message.content) as string;
-
   return (
     <div className="flex gap-4 max-w-3xl mx-auto w-full group">
       <div className="w-8 h-8 mt-1 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white text-xs shadow-md">
@@ -67,10 +65,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
       <div className="text-gray-800 dark:text-gray-200 leading-relaxed max-w-[85%] w-full flex flex-col items-start">
         <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl rounded-tl-sm px-5 py-3 shadow-sm inline-block w-fit overflow-hidden">
-          <div
-            className="prose prose-sm dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 marker:text-primary"
-            dangerouslySetInnerHTML={{ __html: formattedText }}
-          />
+          <div className="prose prose-sm dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 marker:text-primary">
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          </div>
         </div>
         <button
           onClick={handleCopy}

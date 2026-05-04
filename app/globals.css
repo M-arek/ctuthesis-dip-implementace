@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* Use class-based dark mode so .dark class on <html> controls it, not system preference */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -40,3 +41,10 @@ body {
 .dark .chat-scroll::-webkit-scrollbar-thumb {
   background-color: #4b5563;
 }
+
+/* Fallback: zajistí barvu odrážek v markdownu pokud Tailwind plugin chybí */
+.prose ul li::marker,
+.prose ol li::marker {
+  color: var(--primary-color);
+}
+
