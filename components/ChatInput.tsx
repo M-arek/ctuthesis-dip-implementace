@@ -115,7 +115,7 @@ export default function ChatInput({ onSendMessage, disabled = false }: ChatInput
             onKeyDown={handleKeyDown}
             rows={2}
             className="w-full max-h-32 py-3.5 pl-5 pr-24 bg-transparent text-gray-800 dark:text-white outline-none resize-none overflow-y-auto chat-scroll rounded-2xl min-h-[64px] leading-relaxed"
-            placeholder="Napiš zprávu... (Enter pro odeslání)"
+            placeholder="Napiš zprávu..."
             disabled={disabled}
           />
 

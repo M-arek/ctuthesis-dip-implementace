@@ -68,6 +68,25 @@ export function useAppState() {
     return state.conversations.find(c => c.id === state.currentChatId);
   };
 
+  // Nová funkce pro smazání chatu
+  const removeConversation = (chatId: string) => {
+    setState((prev) => {
+      const updatedConversations = prev.conversations.filter(c => c.id !== chatId);
+      
+      // Pokud mažeme chat, ve kterém právě jsme, přeskočíme na nějaký jiný (nebo na prázdnou plochu)
+      let nextChatId = prev.currentChatId;
+      if (prev.currentChatId === chatId) {
+        nextChatId = updatedConversations.length > 0 ? updatedConversations[0].id : null;
+      }
+
+      return {
+        ...prev,
+        conversations: updatedConversations,
+        currentChatId: nextChatId
+      };
+    });
+  };
+
   return {
     state,
     isLoading,
@@ -76,6 +95,9 @@ export function useAppState() {
     setCurrentChatId,
     addConversation,
     updateConversation,
-    getCurrentConversation
+    getCurrentConversation,
+    removeConversation
   };
 }
+
+

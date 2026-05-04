@@ -20,7 +20,8 @@ export default function Chat() {
     setCurrentChatId,
     addConversation,
     updateConversation,
-    getCurrentConversation
+    getCurrentConversation,
+    removeConversation
   } = useAppState();
 
   const { theme, primaryColor, toggleTheme, setPrimaryColor } = useTheme();
@@ -42,7 +43,7 @@ export default function Chat() {
     const initialHistory: Message[] = [{ role: 'user', content: systemPrompt }];
     const newConversation: Conversation = {
       id: chatId,
-      title: problem.substring(0, 20) + '...',
+      title: problem,
       history: initialHistory
     };
 
@@ -54,20 +55,44 @@ export default function Chat() {
     if (!state.userProfile) return;
 
     const chatId = Date.now().toString();
+    // 1. Skrytý kontext pro AI
     const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}.`;
-    const initialHistory: Message[] = [{ role: 'user', content: hiddenContext }];
+    // Zjistíme tón a 5. pád
+    const isFormal = state.userProfile.tone.toLowerCase().includes('vyk');
+    const vocative = state.userProfile.vocativeName;
+    
+    let localAiGreeting = '';
+    if (isFormal) {
+      localAiGreeting = `Dobrý den${vocative ? ' ' + vocative : ''}! Co byste dnes rád(a) probral(a)?`;
+    } else {
+      localAiGreeting = `Ahoj${vocative ? ' ' + vocative : ''}! Co bys chtěl dnes probrat?`;
+    }
+
+    const initialHistory: Message[] = [
+      { role: 'user', content: hiddenContext },
+      { role: 'assistant', content: localAiGreeting }
+    ];
+
     const newConversation: Conversation = {
       id: chatId,
       title: 'Nová konverzace',
-      history: initialHistory
+      history: initialHistory,
+      progress: 0
     };
 
     addConversation(newConversation);
-    await handleBotResponse(chatId, initialHistory);
+    setCurrentChatId(chatId);
+  };
+
+    
+
+  const handleDeleteChat = (chatId: string) => {
+    if (window.confirm('Opravdu chceš tuto konverzaci nenávratně smazat?')) {
+      removeConversation(chatId);
+    }
   };
 
   const handleSendMessage = async (message: string) => {
-    console.debug('[Chat] handleSendMessage', { message, currentChatId: state.currentChatId });
     if (!state.currentChatId) return;
 
     const currentConv = getCurrentConversation();
@@ -75,48 +100,68 @@ export default function Chat() {
 
     const userMessage: Message = { role: 'user', content: message };
     const updatedHistory = [...currentConv.history, userMessage];
-    const newTitle = currentConv.title === 'Nová konverzace' ? message.substring(0, 20) + '...' : currentConv.title;
 
+    // Necháme title původní ("Nová konverzace"), AI nám ho za chvíli samo pošle
     updateConversation(state.currentChatId, (conv) => ({
       ...conv,
-      history: updatedHistory,
-      title: newTitle
+      history: updatedHistory
     }));
 
-    console.debug('[Chat] updatedHistory length', updatedHistory.length);
+    // KOPIE HISTORIE PRO AI - Zde připojíme tajnou instrukci pro název
+    const historyToSend = [...updatedHistory];
+    if (currentConv.title === 'Nová konverzace') {
+      const lastIndex = historyToSend.length - 1;
+      historyToSend[lastIndex] = {
+        ...historyToSend[lastIndex],
+        content: historyToSend[lastIndex].content + "\n\n[SKRYTÁ INSTRUKCE: Na úplný začátek tvé odpovědi přidej skrytý tag s velmi krátkým názvem pro tuto konverzaci (max 60 znaků), např. [TITLE: Hádka kvůli úklidu].]"
+      };
+    }
 
-    // Pass the updated history directly to avoid stale React state closure
-    await handleBotResponse(state.currentChatId, updatedHistory);
+    await handleBotResponse(state.currentChatId, historyToSend);
   };
 
   const handleBotResponse = async (chatId: string, historyToSend?: Message[]) => {
     setIsLoadingMessage(true);
 
     try {
-      // Use the directly passed history to avoid stale state closure
       const conversation = state.conversations.find(c => c.id === chatId);
       const history = historyToSend ?? conversation?.history;
-      if (!history) {
-        console.error('handleBotResponse: no history found for chatId', chatId);
-        return;
-      }
+      if (!history) return;
 
       const data = await fetchAIResponse(history);
-
       let replyText = data.reply;
-      let newProgress: number | undefined;
 
-      // Extract optional leading [PROGRESS: XX] tag (allow whitespace before/after tag)
-      const progressMatch = replyText.match(/^\s*\[PROGRESS:\s*(\d+)\]\s*/i);
-      if (progressMatch) {
-        newProgress = Math.min(100, Math.max(0, parseInt(progressMatch[1], 10)));
-        replyText = replyText.slice(progressMatch[0].length).trim();
+      // 1. EXTRAKCE NÁZVU CHATU: Odchytíme např. [TITLE: Dovolená s tchyní]
+      let newTitle = undefined;
+      const titleMatch = replyText.match(/\[TITLE:\s*(.+?)\]/i);
+      if (titleMatch) {
+        newTitle = titleMatch[1].trim();
+        replyText = replyText.replace(titleMatch[0], '').trim(); // Ustřihneme to z textu
       }
 
+      // 2. EXTRAKCE PROGRESU: Odchytíme např. [PROGRESS: 15]
+      let newProgress = conversation?.progress ?? 0;
+      const progressMatch = replyText.match(/\[PROGRESS:\s*(\d+)\]/i);
+      if (progressMatch) {
+        newProgress = Math.min(100, Math.max(0, parseInt(progressMatch[1], 10)));
+        replyText = replyText.replace(progressMatch[0], '').trim(); // Ustřihneme to z textu
+      }
+
+      // 3. ULOŽENÍ 5. PÁDU JMÉNA (Spustí se jen při prvním dotazníku)
+      if (state.userProfile && !state.userProfile.vocativeName && !state.userProfile.tone.toLowerCase().includes('vyk')) {
+        // Hledá např. "Ahoj Marku!" a uloží si slovo "Marku"
+        const vocativeMatch = replyText.match(/(?:Ahoj|Zdravím)\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽa-záčďéěíňóřšťúůýž]+)[!.,]?/i);
+        if (vocativeMatch) {
+          setUserProfile({ ...state.userProfile, vocativeName: vocativeMatch[1] });
+        }
+      }
+
+      // 4. ULOŽENÍ DO STAVU
       updateConversation(chatId, (conv) => ({
         ...conv,
         history: [...conv.history, { role: 'assistant', content: replyText }],
-        ...(newProgress !== undefined ? { progress: newProgress } : {})
+        progress: newProgress,
+        ...(newTitle ? { title: newTitle } : {}) // Pokud se vygeneroval název, uloží se
       }));
     } catch (error) {
       updateConversation(chatId, (conv) => {
@@ -164,6 +209,7 @@ export default function Chat() {
         currentChatId={state.currentChatId}
         onNewChat={handleNewChat}
         onSelectChat={setCurrentChatId}
+        onDeleteChat={handleDeleteChat}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
@@ -175,28 +221,63 @@ export default function Chat() {
           onToggleTheme={toggleTheme}
           onColorChange={setPrimaryColor}
           onMenuClick={() => setIsSidebarOpen(true)}
+          // NOVÉ: Pošleme procenta jen tehdy, když jsme v nějakém chatu
+          progress={currentConversation ? progress : undefined} 
         />
 
-        {currentConversation && (
-          <div className="px-4 md:px-8 py-2 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-            <div className="flex-1 bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+        {/* PODMÍNKA: Pokud nemáme žádný chat (smazali jsme všechno) */}
+        {!currentConversation ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-fade-in">
+            <div className="w-20 h-20 mb-6 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-4xl shadow-sm border border-gray-100 dark:border-gray-700">
+              💬
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+              Žádná aktivní konverzace
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md">
+              Vyberte si některou ze starších konverzací v levém menu, nebo začněte úplně nové téma.
+            </p>
+            <button
+              onClick={handleNewChat}
+              className="bg-primary hover:opacity-90 text-white font-medium py-3 px-6 rounded-xl transition-colors shadow-md flex items-center gap-2"
+            >
+              <span className="text-xl leading-none">+</span> Vytvořit nový chat
+            </button>
+          </div>
+        ) : (
+          /* POKUD CHAT EXISTUJE, ZOBRAZÍME KLASICKÉ UI */
+          <>
+            {/*
+            <div className="w-full bg-gray-200 dark:bg-gray-800 h-1.5 z-10 relative shadow-sm">
+              <div
+                className={`h-1.5 transition-all duration-500 ease-out ${progress >= 100 ? 'bg-green-500' : 'bg-primary'}`}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            */}
+
+            {/*
+            <div className="px-4 md:px-8 py-2 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
+              <div className="flex-1 bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
               <div
                 className={`h-1.5 transition-all duration-500 rounded-full ${progress >= 100 ? 'bg-green-500' : 'bg-primary'}`}
                 style={{ width: `${progress}%` }}
               />
+              </div>
+              <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{progress}%</span>
             </div>
-            <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{progress}%</span>
-          </div>
+            */}
+
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto chat-scroll p-4 md:p-8 space-y-6 pb-4">
+              {displayMessages.map((msg, index) => (
+                <ChatMessage key={index} message={msg} />
+              ))}
+              {isLoadingMessage && <LoadingMessage />}
+            </div>
+
+            <ChatInput onSendMessage={handleSendMessage} disabled={isLoadingMessage} />
+          </>
         )}
-
-        <div ref={chatContainerRef} className="flex-1 overflow-y-auto chat-scroll p-4 md:p-8 space-y-6 pb-4">
-          {displayMessages.map((msg, index) => (
-            <ChatMessage key={index} message={msg} />
-          ))}
-          {isLoadingMessage && <LoadingMessage />}
-        </div>
-
-        <ChatInput onSendMessage={handleSendMessage} disabled={isLoadingMessage} />
       </main>
     </div>
   );

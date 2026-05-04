@@ -2,6 +2,7 @@ export interface UserProfile {
   name: string;
   status: string;
   tone: string;
+  vocativeName?: string;
 }
 
 export interface Message {

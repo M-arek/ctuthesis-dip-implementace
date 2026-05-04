@@ -34,13 +34,15 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   if (message.role === 'user') {
     return (
       <div className="flex gap-4 max-w-3xl mx-auto w-full group flex-row-reverse">
-        <div className="flex flex-col items-end max-w-[85%] w-full">
+        {/* PŘIDÁNO: relative */}
+        <div className="flex flex-col items-end max-w-[85%] w-full relative">
           <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-tr-sm px-5 py-3 text-gray-800 dark:text-gray-100 break-words w-fit inline-block">
             <div dangerouslySetInnerHTML={{ __html: escapeHTML(message.content).replace(/\n/g, '<br>') }} />
           </div>
+          {/* ZMĚNĚNO: mt-2 mr-1 nahrazeno za absolute -bottom-5 right-1 */}
           <button
             onClick={handleCopy}
-            className={`copy-btn mt-2 mr-1 flex items-center gap-1 text-xs transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 ${
+            className={`copy-btn absolute -bottom-5 right-1 flex items-center gap-1 text-xs transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 ${
               copied ? 'text-green-500 opacity-100' : 'text-gray-400 hover:text-primary'
             }`}
           >
@@ -63,15 +65,18 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       <div className="w-8 h-8 mt-1 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white text-xs shadow-md">
         ✨
       </div>
-      <div className="text-gray-800 dark:text-gray-200 leading-relaxed max-w-[85%] w-full flex flex-col items-start">
+      {/* PŘIDÁNO: relative */}
+      <div className="text-gray-800 dark:text-gray-200 leading-relaxed max-w-[85%] w-full flex flex-col items-start relative">
         <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl rounded-tl-sm px-5 py-3 shadow-sm inline-block w-fit overflow-hidden">
-          <div className="prose prose-sm dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 marker:text-primary">
+          {/* OPRAVENO: Odstraněn překlep "prose prose" na "prose" */}
+          <div className="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 marker:text-primary">
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
         </div>
+        {/* ZMĚNĚNO: mt-2 ml-1 nahrazeno za absolute -bottom-5 left-1 */}
         <button
           onClick={handleCopy}
-          className={`copy-btn mt-2 ml-1 flex items-center gap-1 text-xs transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 ${
+          className={`copy-btn absolute -bottom-5 left-1 flex items-center gap-1 text-xs transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 ${
             copied ? 'text-green-500 opacity-100' : 'text-gray-400 hover:text-primary'
           }`}
         >
