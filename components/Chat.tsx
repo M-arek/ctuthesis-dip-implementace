@@ -48,7 +48,8 @@ export default function Chat() {
     };
 
     addConversation(newConversation);
-    await handleBotResponse(chatId, initialHistory);
+    // ZMĚNA: Přidán parametr "profile" na konec!
+    await handleBotResponse(chatId, initialHistory, profile);
   };
 
   const handleNewChat = async () => {
@@ -120,7 +121,7 @@ export default function Chat() {
     await handleBotResponse(state.currentChatId, historyToSend);
   };
 
-  const handleBotResponse = async (chatId: string, historyToSend?: Message[]) => {
+  const handleBotResponse = async (chatId: string, historyToSend?: Message[], freshProfile?: UserProfile) => {
     setIsLoadingMessage(true);
 
     try {
@@ -148,11 +149,20 @@ export default function Chat() {
       }
 
       // 3. ULOŽENÍ 5. PÁDU JMÉNA (Spustí se jen při prvním dotazníku)
-      if (state.userProfile && !state.userProfile.vocativeName && !state.userProfile.tone.toLowerCase().includes('vyk')) {
-        // Hledá např. "Ahoj Marku!" a uloží si slovo "Marku"
-        const vocativeMatch = replyText.match(/(?:Ahoj|Zdravím)\s+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽa-záčďéěíňóřšťúůýž]+)[!.,]?/i);
+      // ZMĚNA: Použijeme buď čerstvý profil (z dotazníku) nebo ten ze stavu
+      const activeProfile = freshProfile || state.userProfile;
+
+      // ZMĚNA: Tady už se ptáme na activeProfile, který zaručeně existuje
+      // ZMĚNA: Ukládáme vždy (i u vykání) a hledáme i "Dobrý den"
+      if (activeProfile && !activeProfile.vocativeName) {
+        // Zvládne "Ahoj Marku", "Zdravím, Marku" i "Dobrý den, Marku"
+        const vocativeMatch = replyText.match(/(?:Ahoj|Zdravím|Dobrý den)[,\s]+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽa-záčďéěíňóřšťúůýž]+)[!.,]?/i);
         if (vocativeMatch) {
-          setUserProfile({ ...state.userProfile, vocativeName: vocativeMatch[1] });
+          // Raději vyloučíme, pokud by AI omylem řeklo "Dobrý den, pane..."
+          const zachyceno = vocativeMatch[1];
+          if (zachyceno.toLowerCase() !== 'pane' && zachyceno.toLowerCase() !== 'paní') {
+             setUserProfile({ ...activeProfile, vocativeName: zachyceno });
+          }
         }
       }
 

@@ -104,7 +104,7 @@ export default function ChatInput({ onSendMessage, disabled = false }: ChatInput
 
   return (
     <div className="shrink-0 bg-white dark:bg-gray-900 pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom))] px-4 md:px-8 relative z-20">
-      <div className="absolute bottom-full left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none"></div>
+      <div className="absolute bottom-full left-0 right-0 h-0.5 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none"></div>
 
       <div className="max-w-3xl mx-auto relative">
         <form onSubmit={handleSubmit} className="relative flex items-end border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 shadow-sm focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all">
