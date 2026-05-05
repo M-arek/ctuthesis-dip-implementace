@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { AppState, Conversation, UserProfile } from '@/lib/types';
+import { User } from 'firebase/auth';
 import {
-  loadUserProfile,
-  saveUserProfile,
-  loadConversations,
-  saveConversations
-} from '@/lib/storage';
+  getOrSignInUser,
+  loadProfileFromDB,
+  loadConversationsFromDB,
+  saveProfileToDB,
+  saveConversationToDB,
+  deleteConversationFromDB
+} from '@/lib/firebaseHelpers';
 
 export function useAppState() {
   const [state, setState] = useState<AppState>({
@@ -17,28 +20,46 @@ export function useAppState() {
   });
 
   const [isLoading, setIsLoading] = useState(true);
+  
+  // NOVÉ: Držíme si aktuálního přihlášeného uživatele (jeho ID)
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const profile = loadUserProfile();
-    const conversations = loadConversations();
-    setState({
-      userProfile: profile,
-      conversations,
-      currentChatId: conversations.length > 0 ? conversations[0].id : null
-    });
-    setIsLoading(false);
+    const initApp = async () => {
+      try {
+        // 1. Získáme tajné ID uživatele z Firebase
+        const user = await getOrSignInUser();
+        setCurrentUser(user);
+
+        // 2. Stáhneme data z cloudu
+        const profile = await loadProfileFromDB(user.uid);
+        const conversations = await loadConversationsFromDB(user.uid);
+
+        setState({
+          userProfile: profile,
+          conversations,
+          currentChatId: conversations.length > 0 ? conversations[0].id : null
+        });
+      } catch (error) {
+        console.error("Chyba při načítání z Firebase:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initApp();
   }, []);
 
   const setUserProfile = (profile: UserProfile | null) => {
     setState(prev => ({ ...prev, userProfile: profile }));
-    saveUserProfile(profile);
+    // Pošleme profil do cloudu (na pozadí, neblokuje to UI)
+    if (currentUser && profile) {
+      saveProfileToDB(currentUser.uid, profile);
+    }
   };
 
   const setConversations = (conversations: Conversation[]) => {
-    setState(prev => {
-      saveConversations(conversations);
-      return { ...prev, conversations };
-    });
+    setState(prev => ({ ...prev, conversations }));
   };
 
   const setCurrentChatId = (chatId: string | null) => {
@@ -48,18 +69,32 @@ export function useAppState() {
   const addConversation = (conversation: Conversation) => {
     setState(prev => {
       const newConversations = [conversation, ...prev.conversations];
-      saveConversations(newConversations);
       return { ...prev, conversations: newConversations, currentChatId: conversation.id };
     });
-    console.debug('[useAppState] addConversation -> scheduled add for', conversation.id);
+    
+    // Pošleme nový chat do cloudu
+    if (currentUser) {
+      saveConversationToDB(currentUser.uid, conversation);
+    }
   };
 
   const updateConversation = (chatId: string, updater: (conv: Conversation) => Conversation) => {
-    console.debug('[useAppState] updateConversation called for chatId', chatId);
     setState(prev => {
-      const newConversations = prev.conversations.map(c => (c.id === chatId ? updater(c) : c));
-      saveConversations(newConversations);
-      console.debug('[useAppState] updateConversation -> newConversations length', newConversations.length);
+      let updatedConv: Conversation | null = null;
+      
+      const newConversations = prev.conversations.map(c => {
+        if (c.id === chatId) {
+          updatedConv = updater(c);
+          return updatedConv;
+        }
+        return c;
+      });
+
+      // Pošleme upravenou zprávu do cloudu (např. když AI dopíše)
+      if (currentUser && updatedConv) {
+        saveConversationToDB(currentUser.uid, updatedConv);
+      }
+
       return { ...prev, conversations: newConversations };
     });
   };
@@ -68,23 +103,24 @@ export function useAppState() {
     return state.conversations.find(c => c.id === state.currentChatId);
   };
 
-  // Nová funkce pro smazání chatu
   const removeConversation = (chatId: string) => {
     setState((prev) => {
       const updatedConversations = prev.conversations.filter(c => c.id !== chatId);
-      
-      // Pokud mažeme chat, ve kterém právě jsme, přeskočíme na nějaký jiný (nebo na prázdnou plochu)
       let nextChatId = prev.currentChatId;
       if (prev.currentChatId === chatId) {
         nextChatId = updatedConversations.length > 0 ? updatedConversations[0].id : null;
       }
-
       return {
         ...prev,
         conversations: updatedConversations,
         currentChatId: nextChatId
       };
     });
+
+    // Smažeme to i v cloudu
+    if (currentUser) {
+      deleteConversationFromDB(currentUser.uid, chatId);
+    }
   };
 
   return {
@@ -99,5 +135,3 @@ export function useAppState() {
     removeConversation
   };
 }
-
-
