@@ -3,6 +3,7 @@ export interface UserProfile {
   status: string;
   tone: string;
   vocativeName?: string;
+  memory?: string[]; // NOVÉ: Pole pro ukládání faktů
 }
 
 export interface Message {

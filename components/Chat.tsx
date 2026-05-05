@@ -68,7 +68,14 @@ export default function Chat() {
 
     const chatId = Date.now().toString();
     // 1. Skrytý kontext pro AI
-    const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}.`;
+
+    // NOVÉ: Poskládáme všechny dosud známé informace z paměti
+    const memories = state.userProfile.memory && state.userProfile.memory.length > 0 
+      ? `\n\nZ minulých konverzací už o mně víš tyto zásadní věci: ${state.userProfile.memory.join('; ')}.` 
+      : '';
+
+    // Přidáme proměnnou memories nakonec neviditelného kontextu
+    const hiddenContext = `Ahoj, jmenuji se ${state.userProfile.name}. Má aktuální situace: ${state.userProfile.status}. V naší konverzaci mi prosím od teď ${state.userProfile.tone}.${memories}`;
     // Zjistíme tón a 5. pád
     const isFormal = state.userProfile.tone.toLowerCase().includes('vyk');
     const vocative = state.userProfile.vocativeName;
@@ -159,24 +166,45 @@ export default function Chat() {
         replyText = replyText.replace(progressMatch[0], '').trim(); // Ustřihneme to z textu
       }
 
-      // 3. ULOŽENÍ 5. PÁDU JMÉNA (Spustí se jen při prvním dotazníku)
-      // ZMĚNA: Použijeme buď čerstvý profil (z dotazníku) nebo ten ze stavu
+      // --- 1. NAČTENÍ AKTIVNÍHO PROFILU (Musí být hned na začátku!) ---
       const activeProfile = freshProfile || state.userProfile;
 
-      // ZMĚNA: Tady už se ptáme na activeProfile, který zaručeně existuje
-      // ZMĚNA: Ukládáme vždy (i u vykání) a hledáme i "Dobrý den"
-      if (activeProfile && !activeProfile.vocativeName) {
-        // Zvládne "Ahoj Marku", "Zdravím, Marku" i "Dobrý den, Marku"
-        const vocativeMatch = replyText.match(/(?:Ahoj|Zdravím|Dobrý den)[,\s]+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽa-záčďéěíňóřšťúůýž]+)[!.,]?/i);
-        if (vocativeMatch) {
-          // Raději vyloučíme, pokud by AI omylem řeklo "Dobrý den, pane..."
-          const zachyceno = vocativeMatch[1];
-          if (zachyceno.toLowerCase() !== 'pane' && zachyceno.toLowerCase() !== 'paní') {
-             setUserProfile({ ...activeProfile, vocativeName: zachyceno });
+      if (activeProfile) {
+        let profileUpdated = false;
+        let newProfileState = { ...activeProfile };
+
+        // --- 2. ZPRACOVÁNÍ PAMĚTI (MEMORY) ---
+        const memoryMatch = replyText.match(/\[MEMORY:\s*(.*?)\]/i);
+        if (memoryMatch) {
+          const extractedMemory = memoryMatch[1].trim();
+          replyText = replyText.replace(/\[MEMORY:\s*.*?\]/gi, '').trim(); // Smažeme tag z textu
+
+          const currentMemories = newProfileState.memory || [];
+          if (!currentMemories.includes(extractedMemory)) {
+            newProfileState.memory = [...currentMemories, extractedMemory];
+            profileUpdated = true; // Označíme, že se profil změnil
           }
         }
-      }
 
+        // --- 3. ULOŽENÍ 5. PÁDU JMÉNA (Spustí se jen, když ho ještě nemáme) ---
+        if (!newProfileState.vocativeName) {
+          const vocativeMatch = replyText.match(/(?:Ahoj|Zdravím|Dobrý den)[,\s]+([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽa-záčďéěíňóřšťúůýž]+)[!.,]?/i);
+          if (vocativeMatch) {
+            const zachyceno = vocativeMatch[1];
+            if (zachyceno.toLowerCase() !== 'pane' && zachyceno.toLowerCase() !== 'paní') {
+              newProfileState.vocativeName = zachyceno;
+              profileUpdated = true; // Označíme, že se profil změnil
+            }
+          }
+        }
+
+        // --- 4. HROMADNÉ ULOŽENÍ DO PROFILU ---
+        // Uloží se jen tehdy, pokud jsme buď chytili novou paměť, nebo nové jméno
+        if (profileUpdated) {
+          setUserProfile(newProfileState);
+        }
+      }
+      
       // 4. ULOŽENÍ DO STAVU
       updateConversation(chatId, (conv) => ({
         ...conv,

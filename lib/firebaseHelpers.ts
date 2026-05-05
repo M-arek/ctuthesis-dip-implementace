@@ -1,6 +1,7 @@
 import { auth, db } from './firebase';
 import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
-import { doc, setDoc, getDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
+// Změň původní import z firestore tak, aby obsahoval i addDoc
+import { doc, setDoc, getDoc, deleteDoc, collection, getDocs, addDoc } from 'firebase/firestore';
 import { UserProfile, Conversation } from './types';
 
 // 1. ZÍSKÁNÍ NEBO VYTVOŘENÍ ANONYMNÍHO UŽIVATELE
@@ -50,4 +51,17 @@ export const loadConversationsFromDB = async (userId: string): Promise<Conversat
   });
   // Seřadíme od nejnovější (podle ID, které je vlastně timestamp)
   return conversations.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+};
+
+// 4. ULOŽENÍ ZPĚTNÉ VAZBY
+export const saveFeedbackToDB = async (text: string) => {
+  // Vezmeme ID aktuálního uživatele z Firebase (pokud ho prohlížeč z nějakého důvodu ztratil, pošleme "anonym")
+  const userId = auth.currentUser?.uid || 'anonym';
+  
+  // Vytvoříme novou kolekci "feedback" a vložíme do ní dokument
+  await addDoc(collection(db, 'feedback'), {
+    userId,
+    text,
+    createdAt: new Date().toISOString()
+  });
 };
