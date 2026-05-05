@@ -11,6 +11,7 @@ import Header from '@/components/Header';
 import ChatMessage from '@/components/ChatMessage';
 import LoadingMessage from '@/components/LoadingMessage';
 import ChatInput from '@/components/ChatInput';
+import WelcomeFlow from './WelcomeFlow'; // Cestu si případně uprav podle toho, kam jsi soubor uložil
 
 export default function Chat() {
   const {
@@ -28,6 +29,8 @@ export default function Chat() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoadingMessage, setIsLoadingMessage] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [showWelcome, setShowWelcome] = useState(true);
+
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -238,8 +241,14 @@ export default function Chat() {
   }
 
   if (!state.userProfile) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
+  // Nejprve ukážeme uvítání. Jakmile ho odkliká, showWelcome se změní na false.
+  if (showWelcome) {
+    return <WelcomeFlow onFinishWelcome={() => setShowWelcome(false)} />;
   }
+  
+  // Až když je showWelcome false, pustíme ho k samotnému dotazníku
+  return <Onboarding onComplete={handleOnboardingComplete} />;
+}
 
   const currentConversation = getCurrentConversation();
   const displayMessages = currentConversation?.history.filter((msg, index) => {
