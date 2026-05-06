@@ -15,7 +15,7 @@ const PsychologistsScreen = ({ onBack }: { onBack: () => void }) => (
         <div className="w-16 h-16 bg-gray-200 rounded-full flex-shrink-0 overflow-hidden border-2 border-primary/20">
           {/* Tady pak nahradíš src za reálnou fotku */}
           <img 
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=David" 
+            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Davidd" 
             alt="David Otrhal"
             className="w-full h-full object-cover"
           />
@@ -79,7 +79,7 @@ const PsychologistsScreen = ({ onBack }: { onBack: () => void }) => (
 // --- KOMPONENTA 1: Úvodní obrazovka ---
 const WelcomeScreen1 = ({ onNext }: { onNext: () => void }) => (
   <div className="flex flex-col items-center justify-center h-full text-center space-y-6 animate-fade-in">
-    <div className="text-6xl animate-[bounce_5s_infinite]">❤️</div>
+    <div className="text-6xl animate-[bounce_5s_infinite]">❤️‍🔥</div>
     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Vítejte v aplikaci!</h1>
     <h2 className="text-5xl font-extrabold text-primary tracking-tight">Couplii</h2>
     <div className="pt-8 w-full">
