@@ -1,3 +1,4 @@
+import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -112,3 +113,25 @@ Tvá pravidla chování a instrukce:
 @app.get("/")
 async def root():
     return {"status": "Backend běží!"}
+
+@app.get("/api/github-limit")
+async def check_github_limit():
+    """
+    Tato funkce nahrazuje ten tvůj 'curl' příkaz.
+    Zavolá GitHub API a zjistí, kolik ti zbývá požadavků.
+    """
+    url = "https://api.github.com/rate_limit"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+
+    async with httpx.AsyncClient() as client_http:
+        response = await client_http.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            data = response.json()
+            # GitHub Marketplace API (kde běží modely) má limity v sekci 'resources'
+            return data
+        else:
+            return {"error": "Nepodařilo se načíst limity", "details": response.text}
