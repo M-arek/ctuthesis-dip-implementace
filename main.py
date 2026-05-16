@@ -85,53 +85,22 @@ Tvá pravidla chování a instrukce:
         return {"reply": response.choices[0].message.content}
         
 
-    except Exception as e:
+        except Exception as e:
         error_msg = str(e)
         
-        # --- NOVÉ: TVRDÝ DEBUG PRINT DO LOGŮ ---
+        # --- DEBUG PRINT DO LOGŮ ---
         print("\n" + "="*50)
         print("!!! CHYBA PŘI VOLÁNÍ GITHUB/OPENAI API !!!")
         print(error_msg)
         print("="*50 + "\n")
-        
-        if "content management policy" in error_msg or "ResponsibleAIPolicyViolation" in error_msg:
-            return {"reply": "Omlouvám se, ale tato zpráva narazila na naše bezpečnostní filtry..."}
-        
-        return {"reply": f"Jejda, chyba při komunikaci s AI: {error_msg}"}
 
-'''
-    except Exception as e:
-        error_msg = str(e)
-        
-        # Pokud chyba obsahuje zmínku o bezpečnostních filtrech Azure/GitHubu
+        # Pokud chyba obsahuje zmínku o bezpečnostních filtrech GitHubu
         if "content management policy" in error_msg or "ResponsibleAIPolicyViolation" in error_msg:
             return {"reply": "Omlouvám se, ale tato zpráva narazila na naše bezpečnostní filtry (detekce násilí, sebepoškozování apod.). Pokud se nacházíte v krizové situaci a potřebujete pomoc, zavolejte prosím okamžitě na Linku první psychické pomoci: 116 123 nebo na Linku bezpečí: 116 111."}
         
         # Pro jakékoliv jiné technické chyby (např. výpadek internetu)
         return {"reply": f"Jejda, chyba při komunikaci s AI: {error_msg}"}
-'''
+
 @app.get("/")
 async def root():
     return {"status": "Backend běží!"}
-
-@app.get("/api/github-limit")
-async def check_github_limit():
-    """
-    Tato funkce nahrazuje ten tvůj 'curl' příkaz.
-    Zavolá GitHub API a zjistí, kolik ti zbývá požadavků.
-    """
-    url = "https://api.github.com/rate_limit"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-
-    async with httpx.AsyncClient() as client_http:
-        response = await client_http.get(url, headers=headers)
-        
-        if response.status_code == 200:
-            data = response.json()
-            # GitHub Marketplace API (kde běží modely) má limity v sekci 'resources'
-            return data
-        else:
-            return {"error": "Nepodařilo se načíst limity", "details": response.text}
