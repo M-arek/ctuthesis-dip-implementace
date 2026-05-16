@@ -1,148 +1,132 @@
-# Couplii AI Chat - Next.js
+# Couplii — vztahový asistent
 
-Empatický vztahový asistent postavený na Next.js a React.
+Krátké představení projektu a jeho současného stavu.
 
-## 🚀 Technologie
+## Přehled
 
-- **Next.js 15** - React framework s App Router
-- **TypeScript** - Typová bezpečnost
-- **Tailwind CSS** - Utility-first CSS framework
-- **React Hooks** - Pro správu stavu a vedlejších efektů
-- **Marked** - Markdown parser pro AI odpovědi
-- **FastAPI Backend** - Python backend s OpenAI API
+Couplii je frontendová aplikace (Next.js + TypeScript) sloužící jako rozhraní pro empatického vztahového asistenta. Komunikace s AI probíhá přes samostatný Python backend (FastAPI). Frontend využívá Firebase pro anonymní přihlášení a perzistenci profilů a konverzací.
 
-## 📁 Struktura projektu
+## Použité technologie (hlavní)
+
+- Next.js ^16 (App Router)
+- React 19
+- TypeScript 5
+- Tailwind CSS v4 (+ @tailwindcss/typography)
+- Firebase (auth + Firestore)
+- react-markdown — vykreslování markdown odpovědí
+
+Konkrétní závislosti a skripty najdeš v [package.json](package.json).
+
+## Struktura (vybrané soubory)
 
 ```
-├── app/
-│   ├── layout.tsx          # Root layout s metadaty
-│   ├── page.tsx            # Hlavní stránka
-│   └── globals.css         # Globální styly
-├── components/
-│   ├── Chat.tsx            # Hlavní chat komponenta
-│   ├── ChatInput.tsx       # Input s hlasovým vstupem
-│   ├── ChatMessage.tsx     # Zobrazení zpráv
-│   ├── Header.tsx          # Hlavička s nastavením
-│   ├── LoadingMessage.tsx  # Loading indikátor
-│   ├── Onboarding.tsx      # Onboarding formulář
-│   └── Sidebar.tsx         # Boční panel s konverzacemi
-├── hooks/
-│   ├── useAppState.ts      # Hook pro správu stavu aplikace
-│   └── useTheme.ts         # Hook pro správu tématu
-├── lib/
-│   ├── api.ts              # API volání
-│   ├── storage.ts          # LocalStorage utility
-│   └── types.ts            # TypeScript typy
-└── backup_old_app/         # Původní vanilla JS aplikace
+app/
+	├─ layout.tsx
+	├─ page.tsx
+	└─ globals.css          # globální styly + CSS proměnné (--primary-color)
+components/
+	├─ Chat.tsx             # Hlavní chat UI
+	├─ ChatInput.tsx        # Textarea + hlasové diktování
+	├─ ChatMessage.tsx      # Vykreslení zpráv (react-markdown)
+	├─ LoadingMessage.tsx   # Indikátor načítání odpovědí AI (animované tečky, bere primární barvu)
+	├─ Header.tsx           # Logo, ovládání tématu a barvy
+	├─ Sidebar.tsx          # Seznam konverzací + feedback
+	├─ Onboarding.tsx       # Úvodní dotazník
+	└─ WelcomeFlow.tsx      # Úvodní průvodce / progress
+hooks/
+	├─ useAppState.ts       # Správa stavu aplikace + Firebase sync
+	└─ useTheme.ts          # Téma + nastavení `--primary-color`
+lib/
+	├─ api.ts               # Volání na backend (NEXT_PUBLIC_BACKEND_URL)
+	├─ firebase.ts          # Inicializace Firebase (env proměnné)
+	├─ firebaseHelpers.ts   # CRUD pro profily a konverzace (Firestore)
+	├─ storage.ts           # localStorage pro barvu a režim
+	└─ types.ts             # Typy (UserProfile, Message, Conversation)
+public/
+	├─ manifest.json
+	└─ pics/
 ```
 
-## 🛠️ Instalace a spuštění
+## Rychlé spuštění (lokálně)
 
-1. Naklonujte repozitář:
-```bash
-git clone <repository-url>
-cd ctuthesis-dip-implementace
-```
+1. Nainstaluj závislosti a spusť vývojový server:
 
-2. Nainstalujte závislosti:
 ```bash
 npm install
-```
-
-3. Vytvořte `.env.local` soubor:
-```bash
-cp .env.example .env.local
-```
-
-4. Spusťte vývojový server:
-```bash
 npm run dev
 ```
 
-5. Otevřete [http://localhost:3000](http://localhost:3000)
-
-## 🏗️ Build a produkce
+3. Backend (volitelně pro lokální vývoj):
 
 ```bash
-# Build
-npm run build
-
-# Spuštění produkční verze
-npm start
-```
-
-## ✨ Funkce
-
-- ✅ **Onboarding** - Personalizované uvítání
-- ✅ **Tmavý režim** - Automatické přepínání
-- ✅ **Vlastní barvy** - Změna primární barvy
-- ✅ **Historie chatu** - Ukládání do LocalStorage
-- ✅ **Hlasový vstup** - Web Speech API
-- ✅ **Markdown** - Formátování AI odpovědí
-- ✅ **Mobilní optimalizace** - Responzivní design
-- ✅ **Swipe gesta** - Pro mobilní menu
-
-## 🔧 Backend
-
-Python backend běží na Render.com nebo lokálně:
-
-```bash
-# Instalace závislostí
+# backend je oddělený FastAPI servis; v jeho repozitáři spusť např.:
 pip install -r requirements.txt
-
-# Spuštění
 uvicorn main:app --reload --port 8000
 ```
 
-Backend URL můžete změnit v `.env.local`:
-```
-NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
-```
+4. Otevři aplikaci v prohlížeči: http://localhost:3000
 
-## 🛠️ Troubleshooting
+## Konfigurace prostředí
 
-Pokud při spuštění development serveru (`npm run dev`) narazíte na chybu typu "Cannot find native binding" z `@tailwindcss/oxide` nebo podobné chyby související s optional native dependencies, zkuste následující kroky:
+Frontend očekává tyto environment proměnné (vytvoř `.env.local`):
 
-- Rychlé opravení (lokálně):
+- `NEXT_PUBLIC_BACKEND_URL` — URL Python backendu (výchozí: https://ctuthesis-dip-implementace.onrender.com)
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+
+Bez správné Firebase konfigurace nebude fungovat perzistence (Firestore) a anonymní přihlášení.
+
+## Důležité poznámky k implementaci
+
+- Markdown odpovědi AI se vykreslují v [components/ChatMessage.tsx](components/ChatMessage.tsx#L80-L110) pomocí `react-markdown`.
+- Primární barva je uložena jako CSS proměnná `--primary-color` a nastavuje se z hooku [hooks/useTheme.ts](hooks/useTheme.ts#L1-L80).
+- Volání backendu probíhá přes [lib/api.ts](lib/api.ts#L1-L40) a lze URL přepsat pomocí `NEXT_PUBLIC_BACKEND_URL`.
+- Uživatelská data (profil, seznam konverzací) jsou ukládána do Firestore skrze [lib/firebaseHelpers.ts](lib/firebaseHelpers.ts#L1-L200).
+ 
+## Backend — main.py
+
+V kořenovém adresáři projektu je `main.py` — jednoduchý FastAPI backend, který poskytuje HTTP API pro chat a řadu utilitních endpointů. Hlavní body:
+
+- Načítání proměnných prostředí přes `dotenv`; backend očekává proměnnou `GITHUB_TOKEN` (používá se k autentizaci vůči modelům hostovaným přes GitHub).
+- `POST /api/chat`: přijímá JSON ve tvaru `{ history: [{ role, content }, ...] }`, provádí jednoduchý bezpečnostní filtr (detekce krizových výrazů — v takovém případě vrátí kontakty na krizové linky), doplní systémové instrukce a přepošle požadavek na model (konfigurovaný s `base_url` na `https://models.github.ai/inference` a modelem `openai/gpt-4.1-mini`). Odpověď modelu je vrácena v poli `reply`.
+- `GET /api/github-limit`: kontroluje GitHub rate limits pomocí stejného tokenu.
+- `GET /`: health-check, vrací `{ "status": "Backend běží!" }`.
+- Pro lokální vývoj spusť: `uvicorn main:app --reload --port 8000`.
+
+Poznámka: `main.py` obsahuje také jednoduché logování chyb a základní ošetření politik modelu (vrací uživateli srozumitelnou zprávu při porušení bezpečnostních pravidel). Ujisti se, že `GITHUB_TOKEN` je bezpečně nastaven v prostředí nebo v `.env`.
+
+## Hlavní funkce
+
+- Onboarding (úvodní dotazník) a personalizace chatu
+- Tmavý režim (class-based `.dark` řízený z `useTheme`)
+- Nastavitelná primární barva (UI color picker v hlavičce)
+- Markdown v odpovědích AI (react-markdown)
+- Hlasové zadávání zpráv (Web Speech API, pokud prohlížeč podporuje)
+- Synchronizace konverzací a profilu přes Firebase Firestore
+- Progress indikátory v UI (v hlavičce, v seznamu konverzací, welcome flow)
+
+## Troubleshooting
+
+- Pokud narazíš na chybu při instalaci související s optional native dependencies (např. z `@tailwindcss/oxide`), zkus rychlé očištění:
 
 ```bash
-# ukončete případné běžící instance
-pkill -f "next dev" || true
-
-# odstraňte lokální instalace a cache, pak znovu nainstalujte
 rm -rf node_modules package-lock.json .next
 npm install
 npm run dev
 ```
 
-- Trvalejší možnosti:
-	- Přechod na `pnpm` nebo `yarn` — lepší správa optional native dependencies a deterministické lockfiles.
-	- Uzamknout/pinout verze problematických balíčků v `package.json`.
-	- Přidat CI krok, který provede čistou instalaci pokud build selže.
+- Pro stabilnější závislosti v týmu zvaž `pnpm` nebo `yarn`.
 
-Poznámka: výše uvedený rychlý postup je workaround pro neočekávané selhání instalace npm (chyba npm při optional dependencies). Hodí se pro rychlé obnovení vývojového prostředí, ale pokud se chyba opakuje v týmu/CI, doporučujeme zvážit jednu z trvalejších možností.
+## Kde upravit často hledané věci
 
-### `.env` a tokeny
+- Primární barva: [hooks/useTheme.ts](hooks/useTheme.ts#L1-L80) (nastavuje CSS proměnnou `--primary-color`).
+- Markdown: [components/ChatMessage.tsx](components/ChatMessage.tsx#L80-L110) (react-markdown kontejner s `prose` třídou).
+- Backend endpoint: [lib/api.ts](lib/api.ts#L1-L30).
 
-V `README` je zmíněn soubor `.env.local` — ano, pokud backend běží lokálně, je potřeba do něj vložit vaše tokeny/URL ručně (např. `NEXT_PUBLIC_BACKEND_URL` nebo API klíče). Pokud ale používáte vzdálený backend (např. Render) a frontend směruje na jeho veřejnou URL, nemusíte lokálně vypisovat tokeny.
-
-Shrnutí:
-- Lokálně: vytvořte `.env.local` podle `.env.example` a vložte potřebné tokeny.
-- Na Renderu: backend spravuje své env proměnné, frontend může používat veřejné URL, takže nemusíte do repozitáře přidávat tokeny.
-
-
-## 📝 Poznámky ke konverzi
-
-Tato aplikace byla převedena z vanilla JavaScript na Next.js s následujícími změnami:
-
-1. **Modularizace** - Rozdělení do React komponent
-2. **TypeScript** - Přidání typové bezpečnosti
-3. **State management** - Custom hooks místo globálního stavu
-4. **Server-side rendering** - Next.js App Router
-5. **Optimalizace** - Automatický code splitting a optimalizace
-
-Původní aplikace je zachována v `backup_old_app/` složce.
-
-## 📄 License
+## Licence
 
 MIT
