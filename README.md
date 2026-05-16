@@ -14,12 +14,14 @@ Couplii je frontendová aplikace (Next.js + TypeScript) sloužící jako rozhran
 - Tailwind CSS v4 (+ @tailwindcss/typography)
 - Firebase (auth + Firestore)
 - react-markdown — vykreslování markdown odpovědí
+ - FastAPI (Python) — jednoduchý FastAPI backend (součást `main.py`)
 
 Konkrétní závislosti a skripty najdeš v [package.json](package.json).
 
 ## Struktura (vybrané soubory)
 
 ```
+main.py                 # FastAPI backend (API endpoints v `main.py`)
 app/
 	├─ layout.tsx
 	├─ page.tsx
