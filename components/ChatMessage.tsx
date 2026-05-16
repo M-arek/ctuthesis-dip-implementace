@@ -87,7 +87,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       <div className="text-gray-800 dark:text-gray-200 leading-relaxed max-w-[85%] w-full flex flex-col items-start relative">
         <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl rounded-tl-sm px-5 py-3 shadow-sm inline-block w-fit overflow-hidden">
           {/* OPRAVENO: Odstraněn překlep "prose prose" na "prose" */}
-          <div className="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 marker:text-primary">
+          <div className="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 [&_li::marker]:text-primary [&_li::marker]:font-bold">
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
         </div>
