@@ -2,6 +2,8 @@ export interface UserProfile {
   name: string;
   status: string;
   tone: string;
+  vocativeName?: string;
+  memory?: string[]; // NOVÉ: Pole pro ukládání faktů
 }
 
 export interface Message {
@@ -13,6 +15,7 @@ export interface Conversation {
   id: string;
   title: string;
   history: Message[];
+  progress?: number;
 }
 
 export interface AppState {

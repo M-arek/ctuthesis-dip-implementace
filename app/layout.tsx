@@ -1,12 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Couplii AI Chat",
-  description: "Váš empatický vztahový asistent",
+  title: "Couplii",
+  description: "Vztahový pomocník do kapsy",
+  manifest: "/manifest.json",
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>",
+    icon: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50%" x="50%" dominant-baseline="central" text-anchor="middle" font-size="100">❤️‍🔥</text></svg>`,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#9e0000",
 };
 
 export default function RootLayout({
