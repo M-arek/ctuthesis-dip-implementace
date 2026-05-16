@@ -85,7 +85,7 @@ Tvá pravidla chování a instrukce:
         return {"reply": response.choices[0].message.content}
         
 
-        except Exception as e:
+    except Exception as e:
         error_msg = str(e)
         
         # --- DEBUG PRINT DO LOGŮ ---
