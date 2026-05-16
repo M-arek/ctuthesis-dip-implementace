@@ -1,4 +1,4 @@
-# Couplii — vztahový asistent (frontend)
+# Couplii — vztahový asistent
 
 Krátké představení projektu a jeho současného stavu.
 
@@ -86,6 +86,18 @@ Bez správné Firebase konfigurace nebude fungovat perzistence (Firestore) a ano
 - Primární barva je uložena jako CSS proměnná `--primary-color` a nastavuje se z hooku [hooks/useTheme.ts](hooks/useTheme.ts#L1-L80).
 - Volání backendu probíhá přes [lib/api.ts](lib/api.ts#L1-L40) a lze URL přepsat pomocí `NEXT_PUBLIC_BACKEND_URL`.
 - Uživatelská data (profil, seznam konverzací) jsou ukládána do Firestore skrze [lib/firebaseHelpers.ts](lib/firebaseHelpers.ts#L1-L200).
+ 
+## Backend — main.py
+
+V kořenovém adresáři projektu je `main.py` — jednoduchý FastAPI backend, který poskytuje HTTP API pro chat a řadu utilitních endpointů. Hlavní body:
+
+- Načítání proměnných prostředí přes `dotenv`; backend očekává proměnnou `GITHUB_TOKEN` (používá se k autentizaci vůči modelům hostovaným přes GitHub).
+- `POST /api/chat`: přijímá JSON ve tvaru `{ history: [{ role, content }, ...] }`, provádí jednoduchý bezpečnostní filtr (detekce krizových výrazů — v takovém případě vrátí kontakty na krizové linky), doplní systémové instrukce a přepošle požadavek na model (konfigurovaný s `base_url` na `https://models.github.ai/inference` a modelem `openai/gpt-4.1-mini`). Odpověď modelu je vrácena v poli `reply`.
+- `GET /api/github-limit`: kontroluje GitHub rate limits pomocí stejného tokenu.
+- `GET /`: health-check, vrací `{ "status": "Backend běží!" }`.
+- Pro lokální vývoj spusť: `uvicorn main:app --reload --port 8000`.
+
+Poznámka: `main.py` obsahuje také jednoduché logování chyb a základní ošetření politik modelu (vrací uživateli srozumitelnou zprávu při porušení bezpečnostních pravidel). Ujisti se, že `GITHUB_TOKEN` je bezpečně nastaven v prostředí nebo v `.env`.
 
 ## Hlavní funkce
 
