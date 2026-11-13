@@ -1,4 +1,5 @@
 # Couplii — AI Relationship & Communication Assistant
+**Non functional due to "As of July 30, 2026, GitHub Models has been fully retired":** [https://docs.github.com/en/github-models](https://docs.github.com/en/github-models)
 
 *[Česká verze níže / Czech version below](#česká-verze)*
 
